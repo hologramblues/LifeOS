@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Life OS">
+  <meta name="theme-color" content="#0f172a">
+  <title>Life OS Cockpit</title>
+  <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect fill='%230f172a' width='100' height='100' rx='20'/><text y='65' x='50' text-anchor='middle' font-size='50'>🚀</text></svg>">
+  <link rel="manifest" href="manifest.json">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    body { 
+      font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
+      background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+      color: white;
+      min-height: 100vh;
+      min-height: 100dvh;
+      padding-top: env(safe-area-inset-top);
+      padding-bottom: env(safe-area-inset-bottom);
+      overflow-x: hidden;
+    }
+    .header {
+      padding: 16px 20px 12px;
+      background: rgba(15, 23, 42, 0.8);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+    .header h1 { font-size: 28px; font-weight: 700; }
+    .header p { font-size: 13px; color: rgba(255,255,255,0.5); margin-top: 2px; }
+    .streak { 
+      display: inline-flex; 
+      align-items: center; 
+      gap: 4px; 
+      background: linear-gradient(135deg, #f59e0b, #ef4444);
+      padding: 4px 10px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      margin-left: 8px;
+    }
+    .tabs {
+      display: flex;
+      gap: 4px;
+      padding: 12px 16px;
+      background: rgba(0,0,0,0.2);
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .tabs::-webkit-scrollbar { display: none; }
+    .tab {
+      flex: 0 0 auto;
+      padding: 10px 16px;
+      border-radius: 12px;
+      border: none;
+      background: transparent;
+      color: rgba(255,255,255,0.4);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .tab.active {
+      background: rgba(255,255,255,0.1);
+      color: white;
+    }
+    .content { padding: 16px 20px 120px; }
+    .card {
+      background: rgba(255,255,255,0.03);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 10px;
+      cursor: pointer;
+      transition: all 0.2s;
+      border-left: 3px solid #6b7280;
+    }
+    .card:active { transform: scale(0.98); background: rgba(255,255,255,0.06); }
+    .card-title { font-weight: 600; font-size: 15px; margin-bottom: 6px; }
+    .card-meta { display: flex; gap: 12px; font-size: 12px; color: rgba(255,255,255,0.4); flex-wrap: wrap; }
+    .card-meta span { display: flex; align-items: center; gap: 4px; }
+    .priority-high { border-left-color: #ef4444; }
+    .priority-medium { border-left-color: #f59e0b; }
+    .priority-low { border-left-color: #6b7280; }
+    .checkbox {
+      width: 24px;
+      height: 24px;
+      border-radius: 8px;
+      border: 2px solid rgba(255,255,255,0.3);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.2s;
+    }
+    .checkbox.done { background: #22c55e; border-color: #22c55e; }
+    .task-row { display: flex; align-items: flex-start; gap: 12px; }
+    .task-content { flex: 1; min-width: 0; }
+    .task-title.done { text-decoration: line-through; opacity: 0.5; }
+    .section-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.5);
+      margin: 20px 0 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .add-btn {
+      width: 100%;
+      padding: 16px;
+      border-radius: 16px;
+      border: 2px dashed rgba(139, 92, 246, 0.3);
+      background: rgba(139, 92, 246, 0.1);
+      color: #a78bfa;
+      font-size: 15px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-bottom: 20px;
+    }
+    .add-btn:active { background: rgba(139, 92, 246, 0.2); }
+    .badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      background: rgba(255,255,255,0.1);
+    }
+    .badge-today { background: rgba(34, 197, 94, 0.2); color: #4ade80; }
+    .badge-tomorrow { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+    .pipeline {
+      display: flex;
+      gap: 12px;
+      overflow-x: auto;
+      padding-bottom: 16px;
+      -webkit-overflow-scrolling: touch;
+    }
+    .pipeline::-webkit-scrollbar { display: none; }
+    .pipeline-col {
+      flex: 0 0 200px;
+    }
+    .pipeline-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+      font-size: 13px;
+      font-weight: 600;
+      color: rgba(255,255,255,0.6);
+    }
+    .pipeline-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+    .pipeline-card {
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 12px;
+      padding: 12px;
+      margin-bottom: 8px;
+    }
+    .pipeline-card h4 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
+    .pipeline-card p { font-size: 12px; color: rgba(255,255,255,0.4); }
+    .project-progress {
+      height: 4px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 2px;
+      margin-top: 10px;
+      overflow: hidden;
+    }
+    .project-progress-bar {
+      height: 100%;
+      background: linear-gradient(90deg, #8b5cf6, #6366f1);
+      border-radius: 2px;
+      transition: width 0.3s;
+    }
+    /* FAB */
+    .fab {
+      position: fixed;
+      bottom: calc(20px + env(safe-area-inset-bottom));
+      right: 20px;
+      width: 56px;
+      height: 56px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #8b5cf6, #6366f1);
+      border: none;
+      color: white;
+      font-size: 28px;
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
+      z-index: 200;
+      transition: all 0.2s;
+    }
+    .fab:active { transform: scale(0.9); }
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.8);
+      backdrop-filter: blur(10px);
+      z-index: 300;
+      align-items: flex-end;
+      justify-content: center;
+      padding: 16px;
+    }
+    .modal.open { display: flex; }
+    .modal-content {
+      background: linear-gradient(135deg, #1e293b, #0f172a);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 24px;
+      width: 100%;
+      max-width: 400px;
+      padding: 24px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    .modal h3 { font-size: 18px; font-weight: 700; margin-bottom: 16px; }
+    .type-btns {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+    .type-btn {
+      padding: 8px 14px;
+      border-radius: 10px;
+      border: none;
+      background: rgba(255,255,255,0.1);
+      color: rgba(255,255,255,0.6);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .type-btn.active { background: #8b5cf6; color: white; }
+    .input {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: 12px;
+      border: 1px solid rgba(255,255,255,0.2);
+      background: rgba(255,255,255,0.1);
+      color: white;
+      font-size: 15px;
+      outline: none;
+      margin-bottom: 12px;
+    }
+    .input:focus { border-color: #8b5cf6; }
+    .input::placeholder { color: rgba(255,255,255,0.3); }
+    .row { display: flex; gap: 12px; }
+    .row .input { flex: 1; }
+    select.input { appearance: none; cursor: pointer; }
+    .submit-btn {
+      width: 100%;
+      padding: 16px;
+      border-radius: 12px;
+      border: none;
+      background: linear-gradient(135deg, #8b5cf6, #6366f1);
+      color: white;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 8px;
+      transition: all 0.2s;
+    }
+    .submit-btn:disabled { opacity: 0.5; }
+    .submit-btn:active:not(:disabled) { transform: scale(0.98); }
+    .note-types { margin: 12px 0; }
+    .note-types p { font-size: 12px; color: rgba(255,255,255,0.4); margin-bottom: 8px; }
+    .hidden { display: none !important; }
+    .celebration {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 80px;
+      z-index: 400;
+      animation: pop 0.6s ease-out forwards;
+      pointer-events: none;
+    }
+    @keyframes pop {
+      0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
+      50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
+      100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+    }
+    .empty { text-align: center; padding: 40px 20px; color: rgba(255,255,255,0.3); }
+  </style>
+</head>
+<body>
+  <header class="header">
+    <h1>Life OS <span class="streak">🔥 7</span></h1>
+    <p id="greeting">Bonjour Jeremie</p>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab active" data-tab="today">✓ Today</button>
+    <button class="tab" data-tab="notes">📝 Notes</button>
+    <button class="tab" data-tab="calendar">📅 Agenda</button>
+    <button class="tab" data-tab="projects">🚀 Projets</button>
+    <button class="tab" data-tab="people">👥 CRM</button>
+  </nav>
+
+  <main class="content">
+    <!-- TODAY -->
+    <section id="today" class="tab-content">
+      <div id="tasks-list"></div>
+    </section>
+
+    <!-- NOTES -->
+    <section id="notes" class="tab-content hidden">
+      <button class="add-btn" onclick="openCapture('note')">+ Nouvelle note</button>
+      <div class="section-title">📝 Notes récentes</div>
+      <div id="notes-list"></div>
+    </section>
+
+    <!-- CALENDAR -->
+    <section id="calendar" class="tab-content hidden">
+      <button class="add-btn" onclick="openCapture('event')">+ Ajouter un événement</button>
+      <div class="section-title">📅 Prochains événements</div>
+      <div id="events-list"></div>
+    </section>
+
+    <!-- PROJECTS -->
+    <section id="projects" class="tab-content hidden">
+      <div class="section-title">🚀 Projets actifs</div>
+      <div id="projects-list"></div>
+    </section>
+
+    <!-- PEOPLE -->
+    <section id="people" class="tab-content hidden">
+      <div class="pipeline" id="pipeline"></div>
+      <button class="add-btn" onclick="openCapture('contact')">+ Nouveau contact</button>
+    </section>
+  </main>
+
+  <button class="fab" onclick="openCapture('task')">+</button>
+
+  <!-- Modal -->
+  <div class="modal" id="modal" onclick="closeModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+      <h3>⚡ Capture rapide</h3>
+      <div class="type-btns">
+        <button class="type-btn active" data-type="task">✓ Tâche</button>
+        <button class="type-btn" data-type="note">📝 Note</button>
+        <button class="type-btn" data-type="event">📅 Event</button>
+        <button class="type-btn" data-type="project">🚀 Projet</button>
+        <button class="type-btn" data-type="contact">👤 Contact</button>
+      </div>
+      <input type="text" class="input" id="captureInput" placeholder="Qu'est-ce que tu veux capturer ?">
+      
+      <!-- Note type selector -->
+      <div id="noteOptions" class="note-types hidden">
+        <p>Type de note</p>
+        <div class="type-btns">
+          <button class="type-btn active" data-notetype="Idea">💡 Idea</button>
+          <button class="type-btn" data-notetype="Reference">📚 Reference</button>
+          <button class="type-btn" data-notetype="Meeting">🤝 Meeting</button>
+          <button class="type-btn" data-notetype="Journal">📓 Journal</button>
+          <button class="type-btn" data-notetype="Plan">📋 Plan</button>
+        </div>
+        <select class="input" id="noteProject">
+          <option value="">📁 Aucun projet</option>
+        </select>
+      </div>
+
+      <!-- Event options -->
+      <div id="eventOptions" class="hidden">
+        <div class="row">
+          <input type="date" class="input" id="eventDate">
+          <input type="time" class="input" id="eventTime">
+        </div>
+      </div>
+
+      <button class="submit-btn" id="submitBtn" onclick="capture()">Ajouter</button>
+    </div>
+  </div>
+
+  <div class="celebration hidden" id="celebration">🎉</div>
+
+  <script>
+    // Config
+    const N8N_NOTE_URL = 'https://hologramblues.app.n8n.cloud/webhook/lifeos-note';
+    const N8N_EVENT_URL = 'https://hologramblues.app.n8n.cloud/webhook/lifeos-event';
+
+    // State
+    let currentTab = 'today';
+    let captureType = 'task';
+    let noteType = 'Idea';
+    
+    let tasks = [
+      { id: '1', title: 'Review SUPERFAMILY S01E03 outline', done: false, priority: 'High', project: 'SUPERFAMILY', mins: 45 },
+      { id: '2', title: 'Fix cursor bug ROOMS V121', done: false, priority: 'High', project: 'ROOMS', mins: 30 },
+      { id: '3', title: 'Call producteur TF1 - Géosphère', done: false, priority: 'Medium', project: 'GEOSPHERE', time: '14:00', mins: 30 },
+      { id: '4', title: 'Post meme Samourais', done: true, priority: 'Medium', project: 'SAMOURAIS', mins: 15 },
+      { id: '5', title: 'Exercices épaule (kiné)', done: false, priority: 'Low', mins: 20 },
+    ];
+
+    let notes = [
+      { id: 'n1', title: 'Idée twist S01E05 - le père révèle son pouvoir', type: 'Idea', project: 'SUPERFAMILY', date: '2025-12-29' },
+      { id: 'n2', title: 'Notes call Netflix - Julie intéressée par format 8x45', type: 'Meeting', project: 'GEOSPHERE 2', date: '2025-12-28' },
+      { id: 'n3', title: 'Bug fix approach: utiliser MutationObserver', type: 'Idea', project: 'ROOMS', date: '2025-12-29' },
+    ];
+
+    let events = [
+      { id: 'e1', title: 'Call Sophie Martin - TF1', date: '2025-01-02', time: '14:00' },
+      { id: 'e2', title: 'Deadline pitch Géosphère', date: '2025-01-05', time: '18:00' },
+      { id: 'e3', title: 'Review ROOMS avec Thomas', date: '2025-01-03', time: '10:30' },
+    ];
+
+    let projects = [
+      { id: 'p1', name: 'SUPERFAMILY', status: 'Doing', total: 12, done: 4 },
+      { id: 'p2', name: 'ROOMS', status: 'Doing', total: 8, done: 6 },
+      { id: 'p3', name: 'GEOSPHERE 2', status: 'Doing', total: 15, done: 3 },
+      { id: 'p4', name: 'SAMOURAIS', status: 'Ongoing', total: 5, done: 2 },
+      { id: 'p5', name: 'PREMIERE DAME', status: 'On Hold', total: 3, done: 0 },
+    ];
+
+    let people = [
+      { id: 'c1', name: 'Sophie Martin', company: 'TF1', role: 'Dir. Fiction', status: 'Negotiating', next: '2025-01-02' },
+      { id: 'c2', name: 'Marc Dupont', company: 'Canal+', role: 'Producteur', status: 'Contacted' },
+      { id: 'c3', name: 'Julie Chen', company: 'Netflix FR', role: 'Dev Exec', status: 'Prospect' },
+      { id: 'c4', name: 'Thomas', company: 'Dev', role: 'Tech Lead', status: 'Closed' },
+    ];
+
+    const priorityColors = { High: '#ef4444', Medium: '#f59e0b', Low: '#6b7280' };
+    const noteTypeColors = { Idea: '#f59e0b', Reference: '#6b7280', Meeting: '#eab308', Journal: '#8b5cf6', Plan: '#3b82f6' };
+    const pipelineColors = { Prospect: '#6b7280', Contacted: '#3b82f6', Negotiating: '#f59e0b', Closed: '#22c55e' };
+
+    // Greeting
+    function updateGreeting() {
+      const hour = new Date().getHours();
+      let greeting = 'Bonjour';
+      if (hour >= 18) greeting = 'Bonsoir';
+      else if (hour >= 12) greeting = 'Bon après-midi';
+      document.getElementById('greeting').textContent = `${greeting} Jeremie`;
+    }
+
+    // Tabs
+    document.querySelectorAll('.tab').forEach(tab => {
+      tab.addEventListener('click', () => {
+        document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+        document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
+        tab.classList.add('active');
+        currentTab = tab.dataset.tab;
+        document.getElementById(currentTab).classList.remove('hidden');
+      });
+    });
+
+    // Render tasks
+    function renderTasks() {
+      const sorted = [...tasks].sort((a, b) => {
+        if (a.done !== b.done) return a.done ? 1 : -1;
+        const order = { High: 0, Medium: 1, Low: 2 };
+        return order[a.priority] - order[b.priority];
+      });
+      
+      document.getElementById('tasks-list').innerHTML = sorted.map(t => `
+        <div class="card priority-${t.priority.toLowerCase()}" onclick="toggleTask('${t.id}')">
+          <div class="task-row">
+            <div class="checkbox ${t.done ? 'done' : ''}">${t.done ? '✓' : ''}</div>
+            <div class="task-content">
+              <div class="card-title ${t.done ? 'task-title done' : ''}">${t.title}</div>
+              <div class="card-meta">
+                ${t.project ? `<span>📁 ${t.project}</span>` : ''}
+                ${t.time ? `<span style="color:#f59e0b">🕐 ${t.time}</span>` : ''}
+                ${t.mins ? `<span>⏱ ${t.mins}min</span>` : ''}
+              </div>
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function toggleTask(id) {
+      tasks = tasks.map(t => t.id === id ? { ...t, done: !t.done } : t);
+      renderTasks();
+      showCelebration();
+    }
+
+    // Render notes
+    function renderNotes() {
+      document.getElementById('notes-list').innerHTML = notes.length ? notes.map(n => `
+        <div class="card" style="border-left-color: ${noteTypeColors[n.type] || '#6b7280'}">
+          <div class="card-title">${n.title}</div>
+          <div class="card-meta">
+            <span class="badge" style="background: ${noteTypeColors[n.type]}20; color: ${noteTypeColors[n.type]}">${n.type}</span>
+            ${n.project ? `<span>📁 ${n.project}</span>` : ''}
+            <span>${formatDate(n.date)}</span>
+          </div>
+        </div>
+      `).join('') : '<div class="empty">Aucune note</div>';
+    }
+
+    // Render events
+    function renderEvents() {
+      const sorted = [...events].sort((a, b) => new Date(a.date) - new Date(b.date));
+      const today = new Date().toISOString().split('T')[0];
+      const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
+      
+      document.getElementById('events-list').innerHTML = sorted.length ? sorted.map(e => `
+        <div class="card">
+          <div class="card-title">${e.title}</div>
+          <div class="card-meta">
+            <span>📅 ${formatDate(e.date)}</span>
+            ${e.time ? `<span>🕐 ${e.time}</span>` : ''}
+            ${e.date === today ? '<span class="badge badge-today">Aujourd\'hui</span>' : ''}
+            ${e.date === tomorrow ? '<span class="badge badge-tomorrow">Demain</span>' : ''}
+          </div>
+        </div>
+      `).join('') : '<div class="empty">Aucun événement</div>';
+    }
+
+    // Render projects
+    function renderProjects() {
+      document.getElementById('projects-list').innerHTML = projects.map(p => {
+        const pct = p.total > 0 ? Math.round((p.done / p.total) * 100) : 0;
+        return `
+          <div class="card">
+            <div class="card-title">${p.name}</div>
+            <div class="card-meta">
+              <span class="badge">${p.status}</span>
+              <span>${p.done}/${p.total} tâches</span>
+              <span>${pct}%</span>
+            </div>
+            <div class="project-progress">
+              <div class="project-progress-bar" style="width: ${pct}%"></div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      // Update project select
+      document.getElementById('noteProject').innerHTML = '<option value="">📁 Aucun projet</option>' +
+        projects.map(p => `<option value="${p.name}">${p.name}</option>`).join('');
+    }
+
+    // Render pipeline
+    function renderPipeline() {
+      const stages = ['Prospect', 'Contacted', 'Negotiating', 'Closed'];
+      document.getElementById('pipeline').innerHTML = stages.map(stage => {
+        const ps = people.filter(p => p.status === stage);
+        return `
+          <div class="pipeline-col">
+            <div class="pipeline-header">
+              <span class="pipeline-dot" style="background: ${pipelineColors[stage]}"></span>
+              ${stage} (${ps.length})
+            </div>
+            ${ps.map(p => `
+              <div class="pipeline-card">
+                <h4>${p.name}</h4>
+                ${p.company ? `<p>${p.company}</p>` : ''}
+                ${p.role ? `<p>${p.role}</p>` : ''}
+                ${p.next ? `<p style="color:#a78bfa; margin-top:8px">📅 ${formatDate(p.next)}</p>` : ''}
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }).join('');
+    }
+
+    function formatDate(dateStr) {
+      const d = new Date(dateStr);
+      return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
+    }
+
+    // Modal
+    function openCapture(type) {
+      captureType = type;
+      document.getElementById('modal').classList.add('open');
+      document.getElementById('captureInput').focus();
+      updateTypeButtons();
+      updateCaptureUI();
+    }
+
+    function closeModal(e) {
+      if (e.target.id === 'modal') {
+        document.getElementById('modal').classList.remove('open');
+        document.getElementById('captureInput').value = '';
+      }
+    }
+
+    function updateTypeButtons() {
+      document.querySelectorAll('.type-btn[data-type]').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.type === captureType);
+      });
+    }
+
+    function updateCaptureUI() {
+      const input = document.getElementById('captureInput');
+      const noteOpts = document.getElementById('noteOptions');
+      const eventOpts = document.getElementById('eventOptions');
+      
+      noteOpts.classList.add('hidden');
+      eventOpts.classList.add('hidden');
+      
+      if (captureType === 'note') {
+        input.placeholder = 'Titre de la note...';
+        noteOpts.classList.remove('hidden');
+      } else if (captureType === 'event') {
+        input.placeholder = "Titre de l'événement...";
+        eventOpts.classList.remove('hidden');
+        document.getElementById('eventDate').value = new Date().toISOString().split('T')[0];
+      } else if (captureType === 'task') {
+        input.placeholder = 'Nouvelle tâche...';
+      } else if (captureType === 'project') {
+        input.placeholder = 'Nom du projet...';
+      } else if (captureType === 'contact') {
+        input.placeholder = 'Nom du contact...';
+      }
+    }
+
+    // Type buttons
+    document.querySelectorAll('.type-btn[data-type]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        captureType = btn.dataset.type;
+        updateTypeButtons();
+        updateCaptureUI();
+      });
+    });
+
+    // Note type buttons
+    document.querySelectorAll('.type-btn[data-notetype]').forEach(btn => {
+      btn.addEventListener('click', () => {
+        noteType = btn.dataset.notetype;
+        document.querySelectorAll('.type-btn[data-notetype]').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+
+    // Capture
+    async function capture() {
+      const input = document.getElementById('captureInput');
+      const text = input.value.trim();
+      if (!text) return;
+
+      const btn = document.getElementById('submitBtn');
+      btn.disabled = true;
+      btn.textContent = 'Envoi...';
+
+      try {
+        if (captureType === 'task') {
+          tasks.unshift({ id: 't' + Date.now(), title: text, done: false, priority: 'Medium', mins: 20 });
+          renderTasks();
+        } else if (captureType === 'note') {
+          const project = document.getElementById('noteProject').value;
+          const note = { id: 'n' + Date.now(), title: text, type: noteType, project, date: new Date().toISOString().split('T')[0] };
+          notes.unshift(note);
+          renderNotes();
+          
+          // Send to n8n
+          fetch(N8N_NOTE_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title: text, type: noteType, project })
+          }).catch(() => {});
+        } else if (captureType === 'event') {
+          const date = document.getElementById('eventDate').value;
+          const time = document.getElementById('eventTime').value;
+          if (!date) { alert('Choisis une date'); btn.disabled = false; btn.textContent = 'Ajouter'; return; }
+          
+          events.push({ id: 'e' + Date.now(), title: text, date, time });
+          renderEvents();
+          
+          // Send to n8n
+          const startTime = time ? `${date}T${time}:00` : `${date}T09:00:00`;
+          fetch(N8N_EVENT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title: text, startTime })
+          }).catch(() => {});
+        } else if (captureType === 'project') {
+          projects.push({ id: 'p' + Date.now(), name: text, status: 'Planned', total: 0, done: 0 });
+          renderProjects();
+        } else if (captureType === 'contact') {
+          people.push({ id: 'c' + Date.now(), name: text, status: 'Prospect' });
+          renderPipeline();
+        }
+
+        showCelebration();
+        document.getElementById('modal').classList.remove('open');
+        input.value = '';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Ajouter';
+      }
+    }
+
+    function showCelebration() {
+      const el = document.getElementById('celebration');
+      el.classList.remove('hidden');
+      setTimeout(() => el.classList.add('hidden'), 600);
+    }
+
+    // Enter key
+    document.getElementById('captureInput').addEventListener('keydown', e => {
+      if (e.key === 'Enter') capture();
+    });
+
+    // Init
+    updateGreeting();
+    renderTasks();
+    renderNotes();
+    renderEvents();
+    renderProjects();
+    renderPipeline();
+  </script>
+</body>
+</html>

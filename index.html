@@ -400,40 +400,11 @@
     let captureType = 'task';
     let noteType = 'Idea';
     
-    let tasks = [
-      { id: '1', title: 'Review SUPERFAMILY S01E03 outline', done: false, priority: 'High', project: 'SUPERFAMILY', mins: 45 },
-      { id: '2', title: 'Fix cursor bug ROOMS V121', done: false, priority: 'High', project: 'ROOMS', mins: 30 },
-      { id: '3', title: 'Call producteur TF1 - Géosphère', done: false, priority: 'Medium', project: 'GEOSPHERE', time: '14:00', mins: 30 },
-      { id: '4', title: 'Post meme Samourais', done: true, priority: 'Medium', project: 'SAMOURAIS', mins: 15 },
-      { id: '5', title: 'Exercices épaule (kiné)', done: false, priority: 'Low', mins: 20 },
-    ];
-
-    let notes = [
-      { id: 'n1', title: 'Idée twist S01E05 - le père révèle son pouvoir', type: 'Idea', project: 'SUPERFAMILY', date: '2025-12-29' },
-      { id: 'n2', title: 'Notes call Netflix - Julie intéressée par format 8x45', type: 'Meeting', project: 'GEOSPHERE 2', date: '2025-12-28' },
-      { id: 'n3', title: 'Bug fix approach: utiliser MutationObserver', type: 'Idea', project: 'ROOMS', date: '2025-12-29' },
-    ];
-
-    let events = [
-      { id: 'e1', title: 'Call Sophie Martin - TF1', date: '2025-01-02', time: '14:00' },
-      { id: 'e2', title: 'Deadline pitch Géosphère', date: '2025-01-05', time: '18:00' },
-      { id: 'e3', title: 'Review ROOMS avec Thomas', date: '2025-01-03', time: '10:30' },
-    ];
-
-    let projects = [
-      { id: 'p1', name: 'SUPERFAMILY', status: 'Doing', total: 12, done: 4 },
-      { id: 'p2', name: 'ROOMS', status: 'Doing', total: 8, done: 6 },
-      { id: 'p3', name: 'GEOSPHERE 2', status: 'Doing', total: 15, done: 3 },
-      { id: 'p4', name: 'SAMOURAIS', status: 'Ongoing', total: 5, done: 2 },
-      { id: 'p5', name: 'PREMIERE DAME', status: 'On Hold', total: 3, done: 0 },
-    ];
-
-    let people = [
-      { id: 'c1', name: 'Sophie Martin', company: 'TF1', role: 'Dir. Fiction', status: 'Negotiating', next: '2025-01-02' },
-      { id: 'c2', name: 'Marc Dupont', company: 'Canal+', role: 'Producteur', status: 'Contacted' },
-      { id: 'c3', name: 'Julie Chen', company: 'Netflix FR', role: 'Dev Exec', status: 'Prospect' },
-      { id: 'c4', name: 'Thomas', company: 'Dev', role: 'Tech Lead', status: 'Closed' },
-    ];
+    let tasks = [];
+    let notes = [];
+    let events = [];
+    let projects = [];
+    let people = [];
 
     const priorityColors = { High: '#ef4444', Medium: '#f59e0b', Low: '#6b7280' };
     const noteTypeColors = { Idea: '#f59e0b', Reference: '#6b7280', Meeting: '#eab308', Journal: '#8b5cf6', Plan: '#3b82f6' };
@@ -481,7 +452,7 @@
             </div>
           </div>
         </div>
-      `).join('');
+      `).join('') || '<div class="empty">🎯 Aucune tâche<br><small>Appuie sur + pour en créer</small></div>';
     }
 
     function toggleTask(id) {
@@ -501,7 +472,7 @@
             <span>${formatDate(n.date)}</span>
           </div>
         </div>
-      `).join('') : '<div class="empty">Aucune note</div>';
+      `).join('') : '<div class="empty">📝 Aucune note<br><small>Capture tes idées ici</small></div>';
     }
 
     // Render events
@@ -520,11 +491,16 @@
             ${e.date === tomorrow ? '<span class="badge badge-tomorrow">Demain</span>' : ''}
           </div>
         </div>
-      `).join('') : '<div class="empty">Aucun événement</div>';
+      `).join('') : '<div class="empty">📅 Aucun événement<br><small>Ton agenda est libre</small></div>';
     }
 
     // Render projects
     function renderProjects() {
+      if (projects.length === 0) {
+        document.getElementById('projects-list').innerHTML = '<div class="empty">🚀 Aucun projet<br><small>Lance ton premier projet</small></div>';
+        document.getElementById('noteProject').innerHTML = '<option value="">📁 Aucun projet</option>';
+        return;
+      }
       document.getElementById('projects-list').innerHTML = projects.map(p => {
         const pct = p.total > 0 ? Math.round((p.done / p.total) * 100) : 0;
         return `
@@ -549,6 +525,10 @@
 
     // Render pipeline
     function renderPipeline() {
+      if (people.length === 0) {
+        document.getElementById('pipeline').innerHTML = '<div class="empty" style="width:100%">👥 Aucun contact<br><small>Ajoute tes premiers contacts</small></div>';
+        return;
+      }
       const stages = ['Prospect', 'Contacted', 'Negotiating', 'Closed'];
       document.getElementById('pipeline').innerHTML = stages.map(stage => {
         const ps = people.filter(p => p.status === stage);

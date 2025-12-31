@@ -398,13 +398,13 @@
 
   <script>
     // Config - n8n webhooks
-    const N8N_BASE = 'https://jeremiegalan.app.n8n.cloud/webhook';
-    const N8N_NOTE_URL = `${N8N_BASE}/lifeos-note`;
-    const N8N_EVENT_URL = `${N8N_BASE}/lifeos-event`;
-    const N8N_TASKS_URL = `${N8N_BASE}/lifeos-tasks`;
-    const N8N_PROJECTS_URL = `${N8N_BASE}/lifeos-projects`;
-    const N8N_TOGGLE_URL = `${N8N_BASE}/lifeos-toggle`;
-    const N8N_CREATE_TASK_URL = `${N8N_BASE}/lifeos-create-task`;
+    const N8N_BASE = '/api/n8n?endpoint=';
+    const N8N_NOTE_URL = 'https://jeremiegalan.app.n8n.cloud/webhook/lifeos-note';
+    const N8N_EVENT_URL = 'https://jeremiegalan.app.n8n.cloud/webhook/lifeos-event';
+    const N8N_TASKS_URL = `${N8N_BASE}lifeos-tasks`;
+    const N8N_PROJECTS_URL = `${N8N_BASE}lifeos-projects`;
+    const N8N_TOGGLE_URL = `${N8N_BASE}lifeos-toggle`;
+    const N8N_CREATE_TASK_URL = `${N8N_BASE}lifeos-create-task`;
 
     // State
     let currentTab = 'today';

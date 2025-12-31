@@ -12,6 +12,12 @@
   <link rel="manifest" href="manifest.json">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    
+    @keyframes spin {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    
     body { 
       font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
       background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
@@ -391,14 +397,21 @@
   <div class="celebration hidden" id="celebration">🎉</div>
 
   <script>
-    // Config
-    const N8N_NOTE_URL = 'https://hologramblues.app.n8n.cloud/webhook/lifeos-note';
-    const N8N_EVENT_URL = 'https://hologramblues.app.n8n.cloud/webhook/lifeos-event';
+    // Config - n8n webhooks
+    const N8N_BASE = 'https://jeremiegalan.app.n8n.cloud/webhook';
+    const N8N_NOTE_URL = `${N8N_BASE}/lifeos-note`;
+    const N8N_EVENT_URL = `${N8N_BASE}/lifeos-event`;
+    const N8N_TASKS_URL = `${N8N_BASE}/lifeos-tasks`;
+    const N8N_PROJECTS_URL = `${N8N_BASE}/lifeos-projects`;
+    const N8N_TOGGLE_URL = `${N8N_BASE}/lifeos-toggle`;
+    const N8N_CREATE_TASK_URL = `${N8N_BASE}/lifeos-create-task`;
 
     // State
     let currentTab = 'today';
     let captureType = 'task';
     let noteType = 'Idea';
+    let isLoading = false;
+    let projectsMap = {}; // id -> name mapping
     
     let tasks = [];
     let notes = [];
@@ -418,6 +431,147 @@
       else if (hour >= 12) greeting = 'Bon après-midi';
       document.getElementById('greeting').textContent = `${greeting} Jeremie`;
     }
+
+    // === API FUNCTIONS ===
+    
+    // Show/hide loading indicator
+    function setLoading(loading) {
+      isLoading = loading;
+      const header = document.querySelector('.header');
+      if (loading) {
+        if (!document.getElementById('loading-indicator')) {
+          const indicator = document.createElement('div');
+          indicator.id = 'loading-indicator';
+          indicator.innerHTML = '⟳';
+          indicator.style.cssText = 'position:absolute;top:20px;right:20px;animation:spin 1s linear infinite;font-size:18px;';
+          header.style.position = 'relative';
+          header.appendChild(indicator);
+        }
+      } else {
+        const indicator = document.getElementById('loading-indicator');
+        if (indicator) indicator.remove();
+      }
+    }
+
+    // Fetch tasks from Notion via n8n
+    async function fetchTasks() {
+      try {
+        setLoading(true);
+        const res = await fetch(N8N_TASKS_URL);
+        if (!res.ok) throw new Error('Fetch failed');
+        const data = await res.json();
+        
+        if (data.tasks && Array.isArray(data.tasks)) {
+          tasks = data.tasks.map(t => ({
+            id: t.id,
+            title: t.title,
+            done: t.done || false,
+            priority: t.priority || 'Medium',
+            project: projectsMap[t.project] || null,
+            projectId: t.project,
+            time: t.dueDate ? new Date(t.dueDate).toLocaleTimeString('fr', { hour: '2-digit', minute: '2-digit' }) : null,
+            myDay: t.myDay || false
+          }));
+          renderTasks();
+        }
+      } catch (err) {
+        console.error('Fetch tasks error:', err);
+        // Show offline indicator
+        document.getElementById('tasks-list').innerHTML = '<div class="empty">📡 Impossible de charger<br><small>Tire pour rafraîchir</small></div>';
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    // Fetch projects from Notion via n8n
+    async function fetchProjects() {
+      try {
+        const res = await fetch(N8N_PROJECTS_URL);
+        if (!res.ok) throw new Error('Fetch failed');
+        const data = await res.json();
+        
+        if (data.projects && Array.isArray(data.projects)) {
+          projects = data.projects.map(p => ({
+            id: p.id,
+            name: p.name,
+            status: p.status || 'Planned',
+            done: p.tasksDone || 0,
+            total: p.tasksTotal || 0
+          }));
+          
+          // Build lookup map
+          projectsMap = {};
+          projects.forEach(p => projectsMap[p.id] = p.name);
+          
+          renderProjects();
+          updateProjectDropdown();
+        }
+      } catch (err) {
+        console.error('Fetch projects error:', err);
+      }
+    }
+
+    // Update project dropdown in modal
+    function updateProjectDropdown() {
+      const select = document.getElementById('projectSelect');
+      if (!select) return;
+      
+      const currentValue = select.value;
+      select.innerHTML = '<option value="">Aucun projet</option>' + 
+        projects.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+      select.value = currentValue;
+    }
+
+    // Toggle task done status in Notion
+    async function toggleTaskAPI(taskId, done) {
+      try {
+        await fetch(N8N_TOGGLE_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ taskId, done })
+        });
+      } catch (err) {
+        console.error('Toggle error:', err);
+        // Revert on error
+        tasks = tasks.map(t => t.id === taskId ? { ...t, done: !done } : t);
+        renderTasks();
+      }
+    }
+
+    // Pull-to-refresh
+    let touchStartY = 0;
+    let isPulling = false;
+    
+    document.addEventListener('touchstart', e => {
+      if (window.scrollY === 0) {
+        touchStartY = e.touches[0].clientY;
+      }
+    }, { passive: true });
+
+    document.addEventListener('touchmove', e => {
+      if (window.scrollY === 0 && !isLoading) {
+        const touchY = e.touches[0].clientY;
+        const pull = touchY - touchStartY;
+        
+        if (pull > 60 && !isPulling) {
+          isPulling = true;
+          document.querySelector('.header').style.transform = 'translateY(10px)';
+        }
+      }
+    }, { passive: true });
+
+    document.addEventListener('touchend', async () => {
+      if (isPulling && !isLoading) {
+        isPulling = false;
+        document.querySelector('.header').style.transform = '';
+        
+        // Refresh data
+        await Promise.all([fetchTasks(), fetchProjects()]);
+        
+        // Haptic feedback if available
+        if (navigator.vibrate) navigator.vibrate(10);
+      }
+    });
 
     // Tabs
     document.querySelectorAll('.tab').forEach(tab => {
@@ -456,9 +610,17 @@
     }
 
     function toggleTask(id) {
-      tasks = tasks.map(t => t.id === id ? { ...t, done: !t.done } : t);
+      const task = tasks.find(t => t.id === id);
+      if (!task) return;
+      
+      const newDone = !task.done;
+      tasks = tasks.map(t => t.id === id ? { ...t, done: newDone } : t);
       renderTasks();
-      showCelebration();
+      
+      // Sync with Notion
+      toggleTaskAPI(id, newDone);
+      
+      if (newDone) showCelebration();
     }
 
     // Render notes
@@ -632,8 +794,21 @@
 
       try {
         if (captureType === 'task') {
-          tasks.unshift({ id: 't' + Date.now(), title: text, done: false, priority: 'Medium', mins: 20 });
+          // Add locally first for instant feedback
+          const tempId = 't' + Date.now();
+          tasks.unshift({ id: tempId, title: text, done: false, priority: 'Medium', mins: 20 });
           renderTasks();
+          
+          // Send to Notion via n8n
+          fetch(N8N_CREATE_TASK_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title: text })
+          }).then(res => res.json()).then(data => {
+            // Update local task with real Notion ID
+            const task = tasks.find(t => t.id === tempId);
+            if (task && data.taskId) task.id = data.taskId;
+          }).catch(() => {});
         } else if (captureType === 'note') {
           const project = document.getElementById('noteProject').value;
           const note = { id: 'n' + Date.now(), title: text, type: noteType, project, date: new Date().toISOString().split('T')[0] };
@@ -691,11 +866,19 @@
 
     // Init
     updateGreeting();
+    
+    // Show empty state first, then fetch real data
     renderTasks();
     renderNotes();
     renderEvents();
     renderProjects();
     renderPipeline();
+    
+    // Fetch real data from Notion
+    (async () => {
+      await fetchProjects(); // First, get projects for mapping
+      await fetchTasks();    // Then get tasks with project names
+    })();
   </script>
 </body>
 </html>

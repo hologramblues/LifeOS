@@ -23,7 +23,8 @@ export default async function handler(req, res) {
     'lifeos-projects': 'https://hologramblues.app.n8n.cloud/webhook/lifeos-projects',
     'lifeos-toggle': 'https://hologramblues.app.n8n.cloud/webhook/lifeos-toggle',
     'lifeos-create-task': 'https://hologramblues.app.n8n.cloud/webhook/lifeos-create-task',
-    'lifeos-update-task': 'https://hologramblues.app.n8n.cloud/webhook/lifeos-update-task'
+    'lifeos-update-task': 'https://hologramblues.app.n8n.cloud/webhook/lifeos-update-task',
+    'lifeos-delete-task': 'https://hologramblues.app.n8n.cloud/webhook/lifeos-delete-task'
   };
 
   const targetUrl = endpoints[endpoint];

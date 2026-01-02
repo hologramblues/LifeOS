@@ -12,477 +12,147 @@
   <link rel="manifest" href="manifest.json">
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-    
-    @keyframes spin {
-      from { transform: rotate(0deg); }
-      to { transform: rotate(360deg); }
-    }
+    @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+    @keyframes slideIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
     
     body { 
       font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
       background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
-      color: white;
-      min-height: 100vh;
-      min-height: 100dvh;
-      padding-top: env(safe-area-inset-top);
-      padding-bottom: env(safe-area-inset-bottom);
-      overflow-x: hidden;
+      color: white; min-height: 100vh; min-height: 100dvh;
+      padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); overflow-x: hidden;
     }
     
-    /* Confetti Canvas */
-    #confetti-canvas {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      pointer-events: none;
-      z-index: 500;
-    }
+    #confetti-canvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 500; }
     
-    .header {
-      padding: 16px 20px 12px;
-      background: rgba(15, 23, 42, 0.8);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      position: sticky;
-      top: 0;
-      z-index: 100;
-      border-bottom: 1px solid rgba(255,255,255,0.05);
-    }
+    .header { padding: 16px 20px 12px; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); position: sticky; top: 0; z-index: 100; border-bottom: 1px solid rgba(255,255,255,0.05); }
     .header h1 { font-size: 28px; font-weight: 700; }
     .header p { font-size: 13px; color: rgba(255,255,255,0.5); margin-top: 2px; }
-    .streak { 
-      display: inline-flex; 
-      align-items: center; 
-      gap: 4px; 
-      background: linear-gradient(135deg, #f59e0b, #ef4444);
-      padding: 4px 10px;
-      border-radius: 20px;
-      font-size: 12px;
-      font-weight: 600;
-      margin-left: 8px;
-    }
+    .streak { display: inline-flex; align-items: center; gap: 4px; background: linear-gradient(135deg, #f59e0b, #ef4444); padding: 4px 10px; border-radius: 20px; font-size: 12px; font-weight: 600; margin-left: 8px; }
     
-    /* Filter bar */
-    .filters {
-      display: flex;
-      gap: 8px;
-      padding: 12px 16px;
-      background: rgba(0,0,0,0.2);
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-    }
+    .stats-bar { display: flex; gap: 16px; padding: 12px 16px; background: rgba(0,0,0,0.3); overflow-x: auto; }
+    .stat-item { text-align: center; flex: 0 0 auto; }
+    .stat-value { font-size: 24px; font-weight: 700; background: linear-gradient(135deg, #8b5cf6, #6366f1); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .stat-label { font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 2px; }
+    
+    .filters { display: flex; gap: 8px; padding: 12px 16px; background: rgba(0,0,0,0.2); overflow-x: auto; -webkit-overflow-scrolling: touch; }
     .filters::-webkit-scrollbar { display: none; }
-    .filter-chip {
-      flex: 0 0 auto;
-      padding: 8px 14px;
-      border-radius: 20px;
-      border: 1px solid rgba(255,255,255,0.15);
-      background: transparent;
-      color: rgba(255,255,255,0.6);
-      font-size: 13px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .filter-chip.active {
-      background: rgba(139, 92, 246, 0.3);
-      border-color: #8b5cf6;
-      color: white;
-    }
-    .filter-chip .count {
-      background: rgba(255,255,255,0.2);
-      padding: 2px 6px;
-      border-radius: 10px;
-      font-size: 11px;
-    }
+    .filter-chip { flex: 0 0 auto; padding: 8px 14px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.15); background: transparent; color: rgba(255,255,255,0.6); font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; white-space: nowrap; }
+    .filter-chip.active { background: rgba(139, 92, 246, 0.3); border-color: #8b5cf6; color: white; }
+    .filter-chip .count { background: rgba(255,255,255,0.2); padding: 2px 6px; border-radius: 10px; font-size: 11px; }
+    .project-filter { padding: 8px 14px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.15); background: transparent; color: rgba(255,255,255,0.6); font-size: 13px; cursor: pointer; appearance: none; outline: none; }
+    .project-filter option { background: #1e293b; color: white; }
     
-    .tabs {
-      display: flex;
-      gap: 4px;
-      padding: 12px 16px;
-      background: rgba(0,0,0,0.2);
-      overflow-x: auto;
-      -webkit-overflow-scrolling: touch;
-    }
+    .tabs { display: flex; gap: 4px; padding: 12px 16px; background: rgba(0,0,0,0.2); overflow-x: auto; -webkit-overflow-scrolling: touch; }
     .tabs::-webkit-scrollbar { display: none; }
-    .tab {
-      flex: 0 0 auto;
-      padding: 10px 16px;
-      border-radius: 12px;
-      border: none;
-      background: transparent;
-      color: rgba(255,255,255,0.4);
-      font-size: 13px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .tab.active {
-      background: rgba(255,255,255,0.1);
-      color: white;
-    }
+    .tab { flex: 0 0 auto; padding: 10px 16px; border-radius: 12px; border: none; background: transparent; color: rgba(255,255,255,0.4); font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
+    .tab.active { background: rgba(255,255,255,0.1); color: white; }
+    
     .content { padding: 16px 20px 120px; }
-    .card {
-      background: rgba(255,255,255,0.03);
-      backdrop-filter: blur(10px);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 16px;
-      padding: 16px;
-      margin-bottom: 10px;
-      cursor: pointer;
-      transition: all 0.2s;
-      border-left: 3px solid #6b7280;
-    }
-    .card:active { transform: scale(0.98); background: rgba(255,255,255,0.06); }
+    
+    .card-wrapper { position: relative; margin-bottom: 10px; overflow: hidden; border-radius: 16px; }
+    .card-actions-bg { position: absolute; top: 0; right: 0; bottom: 0; width: 140px; display: flex; align-items: center; justify-content: flex-end; padding-right: 16px; gap: 8px; background: linear-gradient(90deg, transparent, #ef4444); border-radius: 16px; }
+    .card-action-btn { width: 40px; height: 40px; border-radius: 50%; border: none; background: rgba(255,255,255,0.2); color: white; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+    
+    .card { background: rgba(255,255,255,0.03); backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 16px; cursor: pointer; transition: transform 0.2s; border-left: 3px solid #6b7280; position: relative; z-index: 1; }
+    .card.swiped { transform: translateX(-100px); }
+    .card:active { background: rgba(255,255,255,0.06); }
     .card-title { font-weight: 600; font-size: 15px; margin-bottom: 6px; }
     .card-meta { display: flex; gap: 8px; font-size: 12px; color: rgba(255,255,255,0.4); flex-wrap: wrap; align-items: center; }
-    .card-meta span { display: flex; align-items: center; gap: 4px; }
     .priority-high { border-left-color: #ef4444; }
     .priority-medium { border-left-color: #f59e0b; }
     .priority-low { border-left-color: #6b7280; }
-    .checkbox {
-      width: 24px;
-      height: 24px;
-      border-radius: 8px;
-      border: 2px solid rgba(255,255,255,0.3);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      transition: all 0.2s;
-    }
+    
+    .checkbox { width: 24px; height: 24px; border-radius: 8px; border: 2px solid rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.2s; }
     .checkbox.done { background: #22c55e; border-color: #22c55e; }
     .task-row { display: flex; align-items: flex-start; gap: 12px; }
     .task-content { flex: 1; min-width: 0; }
     .task-title.done { text-decoration: line-through; opacity: 0.5; }
     
-    /* My Day badge */
-    .myday-badge {
-      background: rgba(251, 191, 36, 0.2);
-      color: #fbbf24;
-      padding: 2px 8px;
-      border-radius: 6px;
-      font-size: 11px;
-      font-weight: 600;
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-    }
+    .myday-badge { background: rgba(251, 191, 36, 0.2); color: #fbbf24; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; }
+    .project-badge { background: rgba(139, 92, 246, 0.2); color: #a78bfa; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; }
     
-    /* Task actions */
-    .task-actions {
-      display: flex;
-      gap: 8px;
-      margin-top: 10px;
-      padding-top: 10px;
-      border-top: 1px solid rgba(255,255,255,0.05);
-    }
-    .task-action-btn {
-      padding: 6px 12px;
-      border-radius: 8px;
-      border: 1px solid rgba(255,255,255,0.15);
-      background: transparent;
-      color: rgba(255,255,255,0.6);
-      font-size: 12px;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
+    .task-actions { display: flex; gap: 8px; margin-top: 10px; padding-top: 10px; border-top: 1px solid rgba(255,255,255,0.05); }
+    .task-action-btn { padding: 6px 12px; border-radius: 8px; border: 1px solid rgba(255,255,255,0.15); background: transparent; color: rgba(255,255,255,0.6); font-size: 12px; cursor: pointer; transition: all 0.2s; }
     .task-action-btn:active { background: rgba(255,255,255,0.1); }
     .task-action-btn.active { background: rgba(251, 191, 36, 0.2); border-color: #fbbf24; color: #fbbf24; }
+    .task-action-btn.danger { border-color: rgba(239, 68, 68, 0.3); color: #f87171; }
     
-    .section-title {
-      font-size: 13px;
-      font-weight: 600;
-      color: rgba(255,255,255,0.5);
-      margin: 20px 0 12px;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .add-btn {
-      width: 100%;
-      padding: 16px;
-      border-radius: 16px;
-      border: 2px dashed rgba(139, 92, 246, 0.3);
-      background: rgba(139, 92, 246, 0.1);
-      color: #a78bfa;
-      font-size: 15px;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.2s;
-      margin-bottom: 20px;
-    }
-    .add-btn:active { background: rgba(139, 92, 246, 0.2); }
-    .badge {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 6px;
-      font-size: 11px;
-      font-weight: 600;
-      background: rgba(255,255,255,0.1);
-    }
+    .section-title { font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.5); margin: 20px 0 12px; display: flex; align-items: center; gap: 8px; }
+    .add-btn { width: 100%; padding: 16px; border-radius: 16px; border: 2px dashed rgba(139, 92, 246, 0.3); background: rgba(139, 92, 246, 0.1); color: #a78bfa; font-size: 15px; font-weight: 600; cursor: pointer; transition: all 0.2s; margin-bottom: 20px; }
+    .badge { display: inline-block; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; background: rgba(255,255,255,0.1); }
     .badge-today { background: rgba(34, 197, 94, 0.2); color: #4ade80; }
     .badge-tomorrow { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
-    .pipeline {
-      display: flex;
-      gap: 12px;
-      overflow-x: auto;
-      padding-bottom: 16px;
-      -webkit-overflow-scrolling: touch;
-    }
-    .pipeline::-webkit-scrollbar { display: none; }
-    .pipeline-col {
-      flex: 0 0 200px;
-    }
-    .pipeline-header {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 12px;
-      font-size: 13px;
-      font-weight: 600;
-      color: rgba(255,255,255,0.6);
-    }
-    .pipeline-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-    }
-    .pipeline-card {
-      background: rgba(255,255,255,0.03);
-      border: 1px solid rgba(255,255,255,0.08);
-      border-radius: 12px;
-      padding: 12px;
-      margin-bottom: 8px;
-    }
+    
+    .pipeline { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 16px; }
+    .pipeline-col { flex: 0 0 200px; }
+    .pipeline-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.6); }
+    .pipeline-dot { width: 8px; height: 8px; border-radius: 50%; }
+    .pipeline-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 12px; margin-bottom: 8px; }
     .pipeline-card h4 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
     .pipeline-card p { font-size: 12px; color: rgba(255,255,255,0.4); }
-    .project-progress {
-      height: 4px;
-      background: rgba(255,255,255,0.1);
-      border-radius: 2px;
-      margin-top: 10px;
-      overflow: hidden;
-    }
-    .project-progress-bar {
-      height: 100%;
-      background: linear-gradient(90deg, #8b5cf6, #6366f1);
-      border-radius: 2px;
-      transition: width 0.3s;
-    }
-    /* FAB */
-    .fab {
-      position: fixed;
-      bottom: calc(20px + env(safe-area-inset-bottom));
-      right: 20px;
-      width: 56px;
-      height: 56px;
-      border-radius: 50%;
-      background: linear-gradient(135deg, #8b5cf6, #6366f1);
-      border: none;
-      color: white;
-      font-size: 28px;
-      cursor: pointer;
-      box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4);
-      z-index: 200;
-      transition: all 0.2s;
-    }
+    
+    .project-progress { height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; margin-top: 10px; overflow: hidden; }
+    .project-progress-bar { height: 100%; background: linear-gradient(90deg, #8b5cf6, #6366f1); border-radius: 2px; transition: width 0.3s; }
+    
+    .fab { position: fixed; bottom: calc(20px + env(safe-area-inset-bottom)); right: 20px; width: 56px; height: 56px; border-radius: 50%; background: linear-gradient(135deg, #8b5cf6, #6366f1); border: none; color: white; font-size: 28px; cursor: pointer; box-shadow: 0 4px 20px rgba(139, 92, 246, 0.4); z-index: 200; transition: all 0.2s; }
     .fab:active { transform: scale(0.9); }
-    /* Modal */
-    .modal {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.8);
-      backdrop-filter: blur(10px);
-      z-index: 300;
-      align-items: flex-end;
-      justify-content: center;
-      padding: 16px;
-    }
+    
+    .modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(10px); z-index: 300; align-items: flex-end; justify-content: center; padding: 16px; }
     .modal.open { display: flex; }
-    .modal-content {
-      background: linear-gradient(135deg, #1e293b, #0f172a);
-      border: 1px solid rgba(255,255,255,0.1);
-      border-radius: 24px;
-      width: 100%;
-      max-width: 400px;
-      padding: 24px;
-      max-height: 80vh;
-      overflow-y: auto;
-    }
+    .modal-content { background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px solid rgba(255,255,255,0.1); border-radius: 24px; width: 100%; max-width: 400px; padding: 24px; max-height: 85vh; overflow-y: auto; animation: slideIn 0.3s ease-out; }
     .modal h3 { font-size: 18px; font-weight: 700; margin-bottom: 16px; }
-    .type-btns {
-      display: flex;
-      gap: 8px;
-      flex-wrap: wrap;
-      margin-bottom: 16px;
-    }
-    .type-btn {
-      padding: 8px 14px;
-      border-radius: 10px;
-      border: none;
-      background: rgba(255,255,255,0.1);
-      color: rgba(255,255,255,0.6);
-      font-size: 13px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
+    
+    .type-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 16px; }
+    .type-btn { padding: 8px 14px; border-radius: 10px; border: none; background: rgba(255,255,255,0.1); color: rgba(255,255,255,0.6); font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
     .type-btn.active { background: #8b5cf6; color: white; }
-    .input {
-      width: 100%;
-      padding: 14px 16px;
-      border-radius: 12px;
-      border: 1px solid rgba(255,255,255,0.2);
-      background: rgba(255,255,255,0.1);
-      color: white;
-      font-size: 15px;
-      outline: none;
-      margin-bottom: 12px;
-    }
+    
+    .input { width: 100%; padding: 14px 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.2); background: rgba(255,255,255,0.1); color: white; font-size: 15px; outline: none; margin-bottom: 12px; }
     .input:focus { border-color: #8b5cf6; }
     .input::placeholder { color: rgba(255,255,255,0.3); }
     .row { display: flex; gap: 12px; }
     .row .input { flex: 1; }
     select.input { appearance: none; cursor: pointer; }
-    .submit-btn {
-      width: 100%;
-      padding: 16px;
-      border-radius: 12px;
-      border: none;
-      background: linear-gradient(135deg, #8b5cf6, #6366f1);
-      color: white;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-      margin-top: 8px;
-      transition: all 0.2s;
-    }
+    
+    .submit-btn { width: 100%; padding: 16px; border-radius: 12px; border: none; background: linear-gradient(135deg, #8b5cf6, #6366f1); color: white; font-size: 16px; font-weight: 600; cursor: pointer; margin-top: 8px; transition: all 0.2s; }
     .submit-btn:disabled { opacity: 0.5; }
-    .submit-btn:active:not(:disabled) { transform: scale(0.98); }
+    .submit-btn.danger { background: linear-gradient(135deg, #ef4444, #dc2626); }
+    
+    .task-options { margin: 12px 0; }
+    .task-options label { display: block; font-size: 12px; color: rgba(255,255,255,0.4); margin-bottom: 6px; }
+    .priority-btns { display: flex; gap: 8px; margin-bottom: 12px; }
+    .priority-btn { flex: 1; padding: 10px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.15); background: transparent; color: rgba(255,255,255,0.6); font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+    .priority-btn.active { border-width: 2px; }
+    .priority-btn[data-priority="High"].active { background: rgba(239, 68, 68, 0.2); border-color: #ef4444; color: #ef4444; }
+    .priority-btn[data-priority="Medium"].active { background: rgba(245, 158, 11, 0.2); border-color: #f59e0b; color: #f59e0b; }
+    .priority-btn[data-priority="Low"].active { background: rgba(107, 114, 128, 0.2); border-color: #6b7280; color: #9ca3af; }
+    
+    .myday-toggle { display: flex; align-items: center; gap: 12px; padding: 12px; border-radius: 12px; background: rgba(255,255,255,0.05); margin-bottom: 12px; cursor: pointer; }
+    .myday-toggle input { display: none; }
+    .myday-toggle .toggle-track { width: 44px; height: 24px; border-radius: 12px; background: rgba(255,255,255,0.2); position: relative; transition: all 0.2s; }
+    .myday-toggle input:checked + .toggle-track { background: #fbbf24; }
+    .myday-toggle .toggle-thumb { width: 20px; height: 20px; border-radius: 50%; background: white; position: absolute; top: 2px; left: 2px; transition: all 0.2s; }
+    .myday-toggle input:checked + .toggle-track .toggle-thumb { left: 22px; }
+    .myday-toggle span { font-size: 14px; color: rgba(255,255,255,0.8); }
+    
     .note-types { margin: 12px 0; }
     .note-types p { font-size: 12px; color: rgba(255,255,255,0.4); margin-bottom: 8px; }
     .hidden { display: none !important; }
-    
-    /* Task options in modal */
-    .task-options {
-      margin: 12px 0;
-    }
-    .task-options label {
-      display: block;
-      font-size: 12px;
-      color: rgba(255,255,255,0.4);
-      margin-bottom: 6px;
-    }
-    .priority-btns {
-      display: flex;
-      gap: 8px;
-      margin-bottom: 12px;
-    }
-    .priority-btn {
-      flex: 1;
-      padding: 10px;
-      border-radius: 10px;
-      border: 1px solid rgba(255,255,255,0.15);
-      background: transparent;
-      color: rgba(255,255,255,0.6);
-      font-size: 12px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .priority-btn.active { border-width: 2px; }
-    .priority-btn[data-priority="High"].active { 
-      background: rgba(239, 68, 68, 0.2); 
-      border-color: #ef4444; 
-      color: #ef4444; 
-    }
-    .priority-btn[data-priority="Medium"].active { 
-      background: rgba(245, 158, 11, 0.2); 
-      border-color: #f59e0b; 
-      color: #f59e0b; 
-    }
-    .priority-btn[data-priority="Low"].active { 
-      background: rgba(107, 114, 128, 0.2); 
-      border-color: #6b7280; 
-      color: #9ca3af; 
-    }
-    
-    .myday-toggle {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px;
-      border-radius: 12px;
-      background: rgba(255,255,255,0.05);
-      margin-bottom: 12px;
-      cursor: pointer;
-    }
-    .myday-toggle input { display: none; }
-    .myday-toggle .toggle-track {
-      width: 44px;
-      height: 24px;
-      border-radius: 12px;
-      background: rgba(255,255,255,0.2);
-      position: relative;
-      transition: all 0.2s;
-    }
-    .myday-toggle input:checked + .toggle-track {
-      background: #fbbf24;
-    }
-    .myday-toggle .toggle-thumb {
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      background: white;
-      position: absolute;
-      top: 2px;
-      left: 2px;
-      transition: all 0.2s;
-    }
-    .myday-toggle input:checked + .toggle-track .toggle-thumb {
-      left: 22px;
-    }
-    .myday-toggle span {
-      font-size: 14px;
-      color: rgba(255,255,255,0.8);
-    }
-    
     .empty { text-align: center; padding: 40px 20px; color: rgba(255,255,255,0.3); }
     
-    /* Stats bar */
-    .stats-bar {
-      display: flex;
-      gap: 16px;
-      padding: 12px 16px;
-      background: rgba(0,0,0,0.3);
-      overflow-x: auto;
-    }
-    .stat-item {
-      text-align: center;
-      flex: 0 0 auto;
-    }
-    .stat-value {
-      font-size: 24px;
-      font-weight: 700;
-      background: linear-gradient(135deg, #8b5cf6, #6366f1);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-    }
-    .stat-label {
-      font-size: 11px;
-      color: rgba(255,255,255,0.4);
-      margin-top: 2px;
-    }
+    .toast { position: fixed; bottom: 100px; left: 50%; transform: translateX(-50%); background: rgba(30, 41, 59, 0.95); border: 1px solid rgba(255,255,255,0.1); padding: 12px 24px; border-radius: 12px; font-size: 14px; z-index: 400; opacity: 0; transition: opacity 0.3s; backdrop-filter: blur(10px); }
+    .toast.show { opacity: 1; }
+    .toast.success { border-color: #22c55e; }
+    .toast.error { border-color: #ef4444; }
+    
+    .confirm-dialog { position: fixed; inset: 0; background: rgba(0,0,0,0.8); display: none; align-items: center; justify-content: center; z-index: 350; padding: 20px; }
+    .confirm-dialog.open { display: flex; }
+    .confirm-content { background: linear-gradient(135deg, #1e293b, #0f172a); border: 1px solid rgba(255,255,255,0.1); border-radius: 20px; padding: 24px; max-width: 320px; text-align: center; }
+    .confirm-content h4 { font-size: 18px; margin-bottom: 8px; }
+    .confirm-content p { font-size: 14px; color: rgba(255,255,255,0.6); margin-bottom: 20px; }
+    .confirm-btns { display: flex; gap: 12px; }
+    .confirm-btns button { flex: 1; padding: 12px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; }
+    .confirm-cancel { background: rgba(255,255,255,0.1); color: white; }
+    .confirm-delete { background: #ef4444; color: white; }
   </style>
 </head>
 <body>
@@ -493,20 +163,10 @@
     <p id="greeting">Bonjour Jeremie</p>
   </header>
 
-  <!-- Stats bar -->
   <div class="stats-bar" id="stats-bar">
-    <div class="stat-item">
-      <div class="stat-value" id="stat-done">0</div>
-      <div class="stat-label">Faites</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-value" id="stat-todo">0</div>
-      <div class="stat-label">À faire</div>
-    </div>
-    <div class="stat-item">
-      <div class="stat-value" id="stat-myday">0</div>
-      <div class="stat-label">My Day</div>
-    </div>
+    <div class="stat-item"><div class="stat-value" id="stat-done">0</div><div class="stat-label">Faites</div></div>
+    <div class="stat-item"><div class="stat-value" id="stat-todo">0</div><div class="stat-label">À faire</div></div>
+    <div class="stat-item"><div class="stat-value" id="stat-myday">0</div><div class="stat-label">My Day</div></div>
   </div>
 
   <nav class="tabs">
@@ -517,41 +177,30 @@
     <button class="tab" data-tab="people">👥 CRM</button>
   </nav>
 
-  <!-- Filters (only on Today tab) -->
   <div class="filters" id="filters">
     <button class="filter-chip active" data-filter="all">Toutes <span class="count" id="count-all">0</span></button>
     <button class="filter-chip" data-filter="myday">☀️ My Day <span class="count" id="count-myday">0</span></button>
     <button class="filter-chip" data-filter="high">🔥 Urgentes <span class="count" id="count-high">0</span></button>
     <button class="filter-chip" data-filter="todo">⏳ À faire <span class="count" id="count-todo">0</span></button>
+    <select class="project-filter" id="project-filter"><option value="">📁 Tous projets</option></select>
   </div>
 
   <main class="content">
-    <!-- TODAY -->
-    <section id="today" class="tab-content">
-      <div id="tasks-list"></div>
-    </section>
-
-    <!-- NOTES -->
+    <section id="today" class="tab-content"><div id="tasks-list"></div></section>
     <section id="notes" class="tab-content hidden">
       <button class="add-btn" onclick="openCapture('note')">+ Nouvelle note</button>
       <div class="section-title">📝 Notes récentes</div>
       <div id="notes-list"></div>
     </section>
-
-    <!-- CALENDAR -->
     <section id="calendar" class="tab-content hidden">
       <button class="add-btn" onclick="openCapture('event')">+ Ajouter un événement</button>
       <div class="section-title">📅 Prochains événements</div>
       <div id="events-list"></div>
     </section>
-
-    <!-- PROJECTS -->
     <section id="projects" class="tab-content hidden">
       <div class="section-title">🚀 Projets actifs</div>
       <div id="projects-list"></div>
     </section>
-
-    <!-- PEOPLE -->
     <section id="people" class="tab-content hidden">
       <div class="pipeline" id="pipeline"></div>
       <button class="add-btn" onclick="openCapture('contact')">+ Nouveau contact</button>
@@ -560,20 +209,18 @@
 
   <button class="fab" onclick="openCapture('task')">+</button>
 
-  <!-- Modal -->
   <div class="modal" id="modal" onclick="closeModal(event)">
     <div class="modal-content" onclick="event.stopPropagation()">
-      <h3>⚡ Capture rapide</h3>
-      <div class="type-btns">
+      <h3 id="modal-title">⚡ Capture rapide</h3>
+      <div class="type-btns" id="type-btns">
         <button class="type-btn active" data-type="task">✓ Tâche</button>
         <button class="type-btn" data-type="note">📝 Note</button>
         <button class="type-btn" data-type="event">📅 Event</button>
         <button class="type-btn" data-type="project">🚀 Projet</button>
         <button class="type-btn" data-type="contact">👤 Contact</button>
       </div>
-      <input type="text" class="input" id="captureInput" placeholder="Qu'est-ce que tu veux capturer ?">
+      <input type="text" class="input" id="captureInput" placeholder="Nouvelle tâche...">
       
-      <!-- Task options -->
       <div id="taskOptions" class="task-options">
         <label>Priorité</label>
         <div class="priority-btns">
@@ -581,23 +228,17 @@
           <button class="priority-btn active" data-priority="Medium">⚡ Medium</button>
           <button class="priority-btn" data-priority="Low">💤 Low</button>
         </div>
-        
         <label>Projet</label>
-        <select class="input" id="taskProject">
-          <option value="">📁 Aucun projet</option>
-        </select>
-        
+        <select class="input" id="taskProject"><option value="">📁 Aucun projet</option></select>
         <label class="myday-toggle">
           <input type="checkbox" id="taskMyDay" checked>
           <div class="toggle-track"><div class="toggle-thumb"></div></div>
           <span>☀️ Ajouter à My Day</span>
         </label>
-        
-        <label>Date d'échéance (optionnel)</label>
+        <label>Date d'échéance</label>
         <input type="date" class="input" id="taskDueDate">
       </div>
       
-      <!-- Note type selector -->
       <div id="noteOptions" class="note-types hidden">
         <p>Type de note</p>
         <div class="type-btns">
@@ -607,12 +248,9 @@
           <button class="type-btn" data-notetype="Journal">📓 Journal</button>
           <button class="type-btn" data-notetype="Plan">📋 Plan</button>
         </div>
-        <select class="input" id="noteProject">
-          <option value="">📁 Aucun projet</option>
-        </select>
+        <select class="input" id="noteProject"><option value="">📁 Aucun projet</option></select>
       </div>
 
-      <!-- Event options -->
       <div id="eventOptions" class="hidden">
         <div class="row">
           <input type="date" class="input" id="eventDate">
@@ -621,424 +259,280 @@
       </div>
 
       <button class="submit-btn" id="submitBtn" onclick="capture()">Ajouter</button>
+      <button class="submit-btn danger hidden" id="deleteBtn" onclick="deleteCurrentTask()" style="margin-top:8px">🗑️ Supprimer</button>
     </div>
   </div>
 
+  <div class="confirm-dialog" id="confirmDialog">
+    <div class="confirm-content">
+      <h4>🗑️ Supprimer ?</h4>
+      <p id="confirm-task-name"></p>
+      <div class="confirm-btns">
+        <button class="confirm-cancel" onclick="closeConfirm()">Annuler</button>
+        <button class="confirm-delete" onclick="confirmDelete()">Supprimer</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
   <script>
-    // ==========================================
-    // CONFETTI SYSTEM
-    // ==========================================
+    // CONFETTI
     const confettiCanvas = document.getElementById('confetti-canvas');
     const confettiCtx = confettiCanvas.getContext('2d');
-    let confettiPieces = [];
-    let confettiAnimating = false;
+    let confettiPieces = [], confettiAnimating = false;
     
-    function resizeConfettiCanvas() {
-      confettiCanvas.width = window.innerWidth;
-      confettiCanvas.height = window.innerHeight;
-    }
-    resizeConfettiCanvas();
-    window.addEventListener('resize', resizeConfettiCanvas);
+    function resizeCanvas() { confettiCanvas.width = window.innerWidth; confettiCanvas.height = window.innerHeight; }
+    resizeCanvas(); window.addEventListener('resize', resizeCanvas);
     
-    class ConfettiPiece {
+    class Confetti {
       constructor(x, y) {
-        this.x = x;
-        this.y = y;
-        this.size = Math.random() * 10 + 5;
-        this.speedX = Math.random() * 6 - 3;
-        this.speedY = Math.random() * -15 - 5;
-        this.gravity = 0.5;
-        this.rotation = Math.random() * 360;
-        this.rotationSpeed = Math.random() * 10 - 5;
+        this.x = x; this.y = y; this.size = Math.random() * 10 + 5;
+        this.speedX = Math.random() * 6 - 3; this.speedY = Math.random() * -15 - 5;
+        this.gravity = 0.5; this.rotation = Math.random() * 360; this.rotationSpeed = Math.random() * 10 - 5;
         this.color = ['#8b5cf6', '#6366f1', '#22c55e', '#fbbf24', '#ef4444', '#ec4899'][Math.floor(Math.random() * 6)];
         this.opacity = 1;
-        this.shape = Math.random() > 0.5 ? 'rect' : 'circle';
       }
-      
-      update() {
-        this.x += this.speedX;
-        this.y += this.speedY;
-        this.speedY += this.gravity;
-        this.rotation += this.rotationSpeed;
-        this.opacity -= 0.01;
-      }
-      
+      update() { this.x += this.speedX; this.y += this.speedY; this.speedY += this.gravity; this.rotation += this.rotationSpeed; this.opacity -= 0.015; }
       draw() {
-        confettiCtx.save();
-        confettiCtx.translate(this.x, this.y);
-        confettiCtx.rotate(this.rotation * Math.PI / 180);
-        confettiCtx.globalAlpha = this.opacity;
-        confettiCtx.fillStyle = this.color;
-        
-        if (this.shape === 'rect') {
-          confettiCtx.fillRect(-this.size / 2, -this.size / 4, this.size, this.size / 2);
-        } else {
-          confettiCtx.beginPath();
-          confettiCtx.arc(0, 0, this.size / 2, 0, Math.PI * 2);
-          confettiCtx.fill();
-        }
-        
+        confettiCtx.save(); confettiCtx.translate(this.x, this.y); confettiCtx.rotate(this.rotation * Math.PI / 180);
+        confettiCtx.globalAlpha = this.opacity; confettiCtx.fillStyle = this.color;
+        confettiCtx.fillRect(-this.size / 2, -this.size / 4, this.size, this.size / 2);
         confettiCtx.restore();
       }
     }
     
     function launchConfetti(x, y) {
-      for (let i = 0; i < 50; i++) {
-        confettiPieces.push(new ConfettiPiece(x || window.innerWidth / 2, y || window.innerHeight / 2));
-      }
-      
-      if (!confettiAnimating) {
-        confettiAnimating = true;
-        animateConfetti();
-      }
-      
-      // Haptic feedback
+      for (let i = 0; i < 50; i++) confettiPieces.push(new Confetti(x || innerWidth / 2, y || innerHeight / 2));
+      if (!confettiAnimating) { confettiAnimating = true; animateConfetti(); }
       if (navigator.vibrate) navigator.vibrate([10, 50, 10]);
     }
     
     function animateConfetti() {
       confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
-      
       confettiPieces = confettiPieces.filter(p => p.opacity > 0 && p.y < confettiCanvas.height);
-      
-      confettiPieces.forEach(p => {
-        p.update();
-        p.draw();
-      });
-      
-      if (confettiPieces.length > 0) {
-        requestAnimationFrame(animateConfetti);
-      } else {
-        confettiAnimating = false;
-      }
+      confettiPieces.forEach(p => { p.update(); p.draw(); });
+      if (confettiPieces.length > 0) requestAnimationFrame(animateConfetti);
+      else confettiAnimating = false;
     }
 
-    // ==========================================
     // CONFIG
-    // ==========================================
     const N8N_BASE = '/api/n8n?endpoint=';
-    const N8N_NOTE_URL = 'https://hologramblues.app.n8n.cloud/webhook/lifeos-note';
-    const N8N_EVENT_URL = 'https://hologramblues.app.n8n.cloud/webhook/lifeos-event';
     const N8N_TASKS_URL = `${N8N_BASE}lifeos-tasks`;
     const N8N_PROJECTS_URL = `${N8N_BASE}lifeos-projects`;
     const N8N_TOGGLE_URL = `${N8N_BASE}lifeos-toggle`;
     const N8N_CREATE_TASK_URL = `${N8N_BASE}lifeos-create-task`;
     const N8N_UPDATE_TASK_URL = `${N8N_BASE}lifeos-update-task`;
+    const N8N_DELETE_TASK_URL = `${N8N_BASE}lifeos-delete-task`;
+    const N8N_NOTE_URL = 'https://hologramblues.app.n8n.cloud/webhook/lifeos-note';
+    const N8N_EVENT_URL = 'https://hologramblues.app.n8n.cloud/webhook/lifeos-event';
 
-    // ==========================================
     // STATE
-    // ==========================================
-    let currentTab = 'today';
-    let currentFilter = 'all';
-    let captureType = 'task';
-    let noteType = 'Idea';
-    let taskPriority = 'Medium';
-    let isLoading = false;
-    let projectsMap = {};
-    let completedToday = 0;
+    let currentTab = 'today', currentFilter = 'all', projectFilter = '', captureType = 'task', noteType = 'Idea', taskPriority = 'Medium';
+    let isLoading = false, projectsMap = {}, completedToday = 0, editingTask = null, taskToDelete = null;
+    let tasks = [], notes = [], events = [], projects = [], people = [];
     
-    let tasks = [];
-    let notes = [];
-    let events = [];
-    let projects = [];
-    let people = [];
-
     const priorityColors = { High: '#ef4444', Medium: '#f59e0b', Low: '#6b7280' };
     const noteTypeColors = { Idea: '#f59e0b', Reference: '#6b7280', Meeting: '#eab308', Journal: '#8b5cf6', Plan: '#3b82f6' };
     const pipelineColors = { Prospect: '#6b7280', Contacted: '#3b82f6', Negotiating: '#f59e0b', Closed: '#22c55e' };
 
-    // ==========================================
+    // TOAST
+    function showToast(msg, type = 'success') {
+      const t = document.getElementById('toast');
+      t.textContent = msg; t.className = `toast show ${type}`;
+      setTimeout(() => t.className = 'toast', 2500);
+    }
+
     // GREETING & STATS
-    // ==========================================
     function updateGreeting() {
-      const hour = new Date().getHours();
-      let greeting = 'Bonjour';
-      if (hour >= 18) greeting = 'Bonsoir';
-      else if (hour >= 12) greeting = 'Bon après-midi';
-      document.getElementById('greeting').textContent = `${greeting} Jeremie`;
+      const h = new Date().getHours();
+      document.getElementById('greeting').textContent = `${h >= 18 ? 'Bonsoir' : h >= 12 ? 'Bon après-midi' : 'Bonjour'} Jeremie`;
     }
     
     function updateStats() {
-      const done = tasks.filter(t => t.done).length;
-      const todo = tasks.filter(t => !t.done).length;
-      const myday = tasks.filter(t => t.myDay && !t.done).length;
-      const high = tasks.filter(t => t.priority === 'High' && !t.done).length;
-      
+      const done = tasks.filter(t => t.done).length, todo = tasks.filter(t => !t.done).length;
+      const myday = tasks.filter(t => t.myDay && !t.done).length, high = tasks.filter(t => t.priority === 'High' && !t.done).length;
       document.getElementById('stat-done').textContent = done;
       document.getElementById('stat-todo').textContent = todo;
       document.getElementById('stat-myday').textContent = myday;
-      
-      // Update filter counts
       document.getElementById('count-all').textContent = tasks.length;
       document.getElementById('count-myday').textContent = tasks.filter(t => t.myDay).length;
       document.getElementById('count-high').textContent = high;
       document.getElementById('count-todo').textContent = todo;
-      
-      // Update streak (simplified - just show completed today)
       document.getElementById('streak').textContent = `🔥 ${completedToday}`;
     }
 
-    // ==========================================
-    // API FUNCTIONS
-    // ==========================================
-    function setLoading(loading) {
-      isLoading = loading;
-      const header = document.querySelector('.header');
-      if (loading) {
-        if (!document.getElementById('loading-indicator')) {
-          const indicator = document.createElement('div');
-          indicator.id = 'loading-indicator';
-          indicator.innerHTML = '⟳';
-          indicator.style.cssText = 'position:absolute;top:20px;right:20px;animation:spin 1s linear infinite;font-size:18px;';
-          header.style.position = 'relative';
-          header.appendChild(indicator);
-        }
-      } else {
-        const indicator = document.getElementById('loading-indicator');
-        if (indicator) indicator.remove();
-      }
+    // API
+    function setLoading(l) {
+      isLoading = l;
+      const h = document.querySelector('.header');
+      if (l && !document.getElementById('loading-indicator')) {
+        const i = document.createElement('div'); i.id = 'loading-indicator'; i.innerHTML = '⟳';
+        i.style.cssText = 'position:absolute;top:20px;right:20px;animation:spin 1s linear infinite;font-size:18px;';
+        h.style.position = 'relative'; h.appendChild(i);
+      } else if (!l) { const i = document.getElementById('loading-indicator'); if (i) i.remove(); }
     }
 
     async function fetchTasks() {
       try {
         setLoading(true);
         const res = await fetch(N8N_TASKS_URL);
-        if (!res.ok) throw new Error('Fetch failed');
         const data = await res.json();
-        
-        if (data.tasks && Array.isArray(data.tasks)) {
-          tasks = data.tasks.map(t => ({
-            id: t.id,
-            title: t.title,
-            done: t.done || false,
-            priority: t.priority || 'Medium',
-            project: projectsMap[t.project] || null,
-            projectId: t.project,
-            time: t.dueDate ? new Date(t.dueDate).toLocaleTimeString('fr', { hour: '2-digit', minute: '2-digit' }) : null,
-            dueDate: t.dueDate,
-            myDay: t.myDay || false
-          }));
-          renderTasks();
-          updateStats();
+        if (data.tasks) {
+          tasks = data.tasks.map(t => ({ id: t.id, title: t.title, done: t.done || false, priority: t.priority || 'Medium', project: projectsMap[t.project] || null, projectId: t.project, dueDate: t.dueDate, myDay: t.myDay || false }));
+          renderTasks(); updateStats();
         }
-      } catch (err) {
-        console.error('Fetch tasks error:', err);
-        document.getElementById('tasks-list').innerHTML = '<div class="empty">📡 Impossible de charger<br><small>Tire pour rafraîchir</small></div>';
-      } finally {
-        setLoading(false);
-      }
+      } catch (e) { console.error(e); document.getElementById('tasks-list').innerHTML = '<div class="empty">📡 Erreur de chargement</div>'; }
+      finally { setLoading(false); }
     }
 
     async function fetchProjects() {
       try {
         const res = await fetch(N8N_PROJECTS_URL);
-        if (!res.ok) throw new Error('Fetch failed');
         const data = await res.json();
-        
-        if (data.projects && Array.isArray(data.projects)) {
-          projects = data.projects.map(p => ({
-            id: p.id,
-            name: p.name,
-            status: p.status || 'Planned',
-            done: p.tasksDone || 0,
-            total: p.tasksTotal || 0
-          }));
-          
-          projectsMap = {};
-          projects.forEach(p => projectsMap[p.id] = p.name);
-          
-          renderProjects();
-          updateProjectDropdowns();
+        if (data.projects) {
+          projects = data.projects.map(p => ({ id: p.id, name: p.name, status: p.status || 'Planned', done: p.tasksDone || 0, total: p.tasksTotal || 0 }));
+          projectsMap = {}; projects.forEach(p => projectsMap[p.id] = p.name);
+          renderProjects(); updateProjectDropdowns();
         }
-      } catch (err) {
-        console.error('Fetch projects error:', err);
-      }
+      } catch (e) { console.error(e); }
     }
 
     function updateProjectDropdowns() {
-      const taskSelect = document.getElementById('taskProject');
-      const noteSelect = document.getElementById('noteProject');
-      
-      const options = '<option value="">📁 Aucun projet</option>' + 
-        projects.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
-      
-      if (taskSelect) taskSelect.innerHTML = options;
-      if (noteSelect) noteSelect.innerHTML = options;
+      const opts = '<option value="">📁 Aucun projet</option>' + projects.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+      ['taskProject', 'noteProject'].forEach(id => { const el = document.getElementById(id); if (el) el.innerHTML = opts; });
+      document.getElementById('project-filter').innerHTML = '<option value="">📁 Tous projets</option>' + projects.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
     }
 
-    async function toggleTaskAPI(taskId, done) {
-      try {
-        await fetch(N8N_TOGGLE_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ taskId, done })
-        });
-      } catch (err) {
-        console.error('Toggle error:', err);
-        tasks = tasks.map(t => t.id === taskId ? { ...t, done: !done } : t);
-        renderTasks();
-      }
-    }
-    
-    async function toggleMyDayAPI(taskId, myDay) {
-      try {
-        await fetch(N8N_UPDATE_TASK_URL, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ taskId, myDay })
-        });
-      } catch (err) {
-        console.error('Toggle My Day error:', err);
-        tasks = tasks.map(t => t.id === taskId ? { ...t, myDay: !myDay } : t);
-        renderTasks();
-      }
-    }
+    async function toggleTaskAPI(id, done) { fetch(N8N_TOGGLE_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ taskId: id, done }) }).catch(() => showToast('Erreur sync', 'error')); }
+    async function toggleMyDayAPI(id, myDay) { fetch(N8N_UPDATE_TASK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ taskId: id, myDay }) }).catch(() => showToast('Erreur sync', 'error')); }
+    async function deleteTaskAPI(id) { fetch(N8N_DELETE_TASK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ taskId: id }) }).then(() => showToast('Supprimé')).catch(() => showToast('Erreur', 'error')); }
 
-    // ==========================================
     // PULL TO REFRESH
-    // ==========================================
-    let touchStartY = 0;
-    let isPulling = false;
-    
-    document.addEventListener('touchstart', e => {
-      if (window.scrollY === 0) {
-        touchStartY = e.touches[0].clientY;
-      }
-    }, { passive: true });
+    let touchStartY = 0, isPulling = false;
+    document.addEventListener('touchstart', e => { if (scrollY === 0) touchStartY = e.touches[0].clientY; }, { passive: true });
+    document.addEventListener('touchmove', e => { if (scrollY === 0 && !isLoading && e.touches[0].clientY - touchStartY > 60 && !isPulling) { isPulling = true; document.querySelector('.header').style.transform = 'translateY(10px)'; } }, { passive: true });
+    document.addEventListener('touchend', async () => { if (isPulling && !isLoading) { isPulling = false; document.querySelector('.header').style.transform = ''; await Promise.all([fetchTasks(), fetchProjects()]); if (navigator.vibrate) navigator.vibrate(10); showToast('Actualisé !'); } });
 
-    document.addEventListener('touchmove', e => {
-      if (window.scrollY === 0 && !isLoading) {
-        const touchY = e.touches[0].clientY;
-        const pull = touchY - touchStartY;
-        
-        if (pull > 60 && !isPulling) {
-          isPulling = true;
-          document.querySelector('.header').style.transform = 'translateY(10px)';
-        }
-      }
-    }, { passive: true });
-
-    document.addEventListener('touchend', async () => {
-      if (isPulling && !isLoading) {
-        isPulling = false;
-        document.querySelector('.header').style.transform = '';
-        await Promise.all([fetchTasks(), fetchProjects()]);
-        if (navigator.vibrate) navigator.vibrate(10);
-      }
-    });
-
-    // ==========================================
     // TABS & FILTERS
-    // ==========================================
     document.querySelectorAll('.tab').forEach(tab => {
       tab.addEventListener('click', () => {
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
         document.querySelectorAll('.tab-content').forEach(c => c.classList.add('hidden'));
-        tab.classList.add('active');
-        currentTab = tab.dataset.tab;
+        tab.classList.add('active'); currentTab = tab.dataset.tab;
         document.getElementById(currentTab).classList.remove('hidden');
-        
-        // Show/hide filters
-        document.getElementById('filters').style.display = currentTab === 'today' ? 'flex' : 'none';
-        document.getElementById('stats-bar').style.display = currentTab === 'today' ? 'flex' : 'none';
+        const show = currentTab === 'today';
+        document.getElementById('filters').style.display = show ? 'flex' : 'none';
+        document.getElementById('stats-bar').style.display = show ? 'flex' : 'none';
       });
     });
     
     document.querySelectorAll('.filter-chip').forEach(chip => {
       chip.addEventListener('click', () => {
         document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-        chip.classList.add('active');
-        currentFilter = chip.dataset.filter;
-        renderTasks();
+        chip.classList.add('active'); currentFilter = chip.dataset.filter; renderTasks();
       });
     });
+    
+    document.getElementById('project-filter').addEventListener('change', e => { projectFilter = e.target.value; renderTasks(); });
 
-    // ==========================================
-    // RENDER FUNCTIONS
-    // ==========================================
+    // RENDER TASKS
     function renderTasks() {
       let filtered = [...tasks];
+      if (currentFilter === 'myday') filtered = filtered.filter(t => t.myDay);
+      else if (currentFilter === 'high') filtered = filtered.filter(t => t.priority === 'High' && !t.done);
+      else if (currentFilter === 'todo') filtered = filtered.filter(t => !t.done);
+      if (projectFilter) filtered = filtered.filter(t => t.projectId === projectFilter);
       
-      // Apply filter
-      switch (currentFilter) {
-        case 'myday':
-          filtered = filtered.filter(t => t.myDay);
-          break;
-        case 'high':
-          filtered = filtered.filter(t => t.priority === 'High' && !t.done);
-          break;
-        case 'todo':
-          filtered = filtered.filter(t => !t.done);
-          break;
-      }
+      filtered.sort((a, b) => { if (a.done !== b.done) return a.done ? 1 : -1; return { High: 0, Medium: 1, Low: 2 }[a.priority] - { High: 0, Medium: 1, Low: 2 }[b.priority]; });
       
-      // Sort: undone first, then by priority
-      const sorted = filtered.sort((a, b) => {
-        if (a.done !== b.done) return a.done ? 1 : -1;
-        const order = { High: 0, Medium: 1, Low: 2 };
-        return order[a.priority] - order[b.priority];
-      });
-      
-      document.getElementById('tasks-list').innerHTML = sorted.map(t => `
-        <div class="card priority-${t.priority.toLowerCase()}" data-id="${t.id}">
-          <div class="task-row" onclick="toggleTask('${t.id}')">
-            <div class="checkbox ${t.done ? 'done' : ''}">${t.done ? '✓' : ''}</div>
-            <div class="task-content">
-              <div class="card-title ${t.done ? 'task-title done' : ''}">${t.title}</div>
-              <div class="card-meta">
-                ${t.myDay ? '<span class="myday-badge">☀️ My Day</span>' : ''}
-                ${t.project ? `<span>📁 ${t.project}</span>` : ''}
-                ${t.dueDate ? `<span style="color:#f59e0b">📅 ${formatDate(t.dueDate)}</span>` : ''}
+      document.getElementById('tasks-list').innerHTML = filtered.map(t => `
+        <div class="card-wrapper">
+          <div class="card-actions-bg">
+            <button class="card-action-btn" onclick="openEditTask('${t.id}')">✏️</button>
+            <button class="card-action-btn" onclick="askDelete('${t.id}')">🗑️</button>
+          </div>
+          <div class="card priority-${t.priority.toLowerCase()}" data-id="${t.id}" id="card-${t.id}">
+            <div class="task-row" onclick="toggleTask('${t.id}')">
+              <div class="checkbox ${t.done ? 'done' : ''}">${t.done ? '✓' : ''}</div>
+              <div class="task-content">
+                <div class="card-title ${t.done ? 'task-title done' : ''}">${t.title}</div>
+                <div class="card-meta">
+                  ${t.myDay ? '<span class="myday-badge">☀️ My Day</span>' : ''}
+                  ${t.project ? `<span class="project-badge">📁 ${t.project}</span>` : ''}
+                  ${t.dueDate ? `<span style="color:#f59e0b">📅 ${formatDate(t.dueDate)}</span>` : ''}
+                </div>
               </div>
             </div>
-          </div>
-          <div class="task-actions">
-            <button class="task-action-btn ${t.myDay ? 'active' : ''}" onclick="event.stopPropagation(); toggleMyDay('${t.id}')">
-              ☀️ My Day
-            </button>
+            <div class="task-actions">
+              <button class="task-action-btn ${t.myDay ? 'active' : ''}" onclick="event.stopPropagation(); toggleMyDay('${t.id}')">☀️ My Day</button>
+              <button class="task-action-btn" onclick="event.stopPropagation(); openEditTask('${t.id}')">✏️ Éditer</button>
+              <button class="task-action-btn danger" onclick="event.stopPropagation(); askDelete('${t.id}')">🗑️</button>
+            </div>
           </div>
         </div>
       `).join('') || '<div class="empty">🎯 Aucune tâche<br><small>Appuie sur + pour en créer</small></div>';
       
-      updateStats();
+      setupSwipe(); updateStats();
+    }
+    
+    function setupSwipe() {
+      document.querySelectorAll('.card').forEach(card => {
+        let startX = 0, currentX = 0, dragging = false;
+        card.addEventListener('touchstart', e => { startX = e.touches[0].clientX; dragging = true; }, { passive: true });
+        card.addEventListener('touchmove', e => { if (!dragging) return; currentX = e.touches[0].clientX; const d = startX - currentX; if (d > 0 && d < 120) card.style.transform = `translateX(-${d}px)`; }, { passive: true });
+        card.addEventListener('touchend', () => { dragging = false; const d = startX - currentX; if (d > 60) { card.classList.add('swiped'); card.style.transform = 'translateX(-100px)'; } else { card.classList.remove('swiped'); card.style.transform = ''; } });
+        card.addEventListener('click', () => { if (card.classList.contains('swiped')) { card.classList.remove('swiped'); card.style.transform = ''; } });
+      });
     }
 
     function toggleTask(id) {
-      const task = tasks.find(t => t.id === id);
-      if (!task) return;
-      
-      const newDone = !task.done;
-      tasks = tasks.map(t => t.id === id ? { ...t, done: newDone } : t);
-      renderTasks();
-      
-      toggleTaskAPI(id, newDone);
-      
-      if (newDone) {
-        completedToday++;
-        updateStats();
-        
-        // Get task card position for confetti
-        const card = document.querySelector(`[data-id="${id}"]`);
-        if (card) {
-          const rect = card.getBoundingClientRect();
-          launchConfetti(rect.left + rect.width / 2, rect.top);
-        } else {
-          launchConfetti();
-        }
-      }
+      const t = tasks.find(x => x.id === id); if (!t) return;
+      t.done = !t.done; renderTasks(); toggleTaskAPI(id, t.done);
+      if (t.done) { completedToday++; updateStats(); const c = document.querySelector(`[data-id="${id}"]`); if (c) { const r = c.getBoundingClientRect(); launchConfetti(r.left + r.width / 2, r.top); } else launchConfetti(); }
     }
     
     function toggleMyDay(id) {
-      const task = tasks.find(t => t.id === id);
-      if (!task) return;
-      
-      const newMyDay = !task.myDay;
-      tasks = tasks.map(t => t.id === id ? { ...t, myDay: newMyDay } : t);
-      renderTasks();
-      
-      toggleMyDayAPI(id, newMyDay);
+      const t = tasks.find(x => x.id === id); if (!t) return;
+      t.myDay = !t.myDay; renderTasks(); toggleMyDayAPI(id, t.myDay);
+      showToast(t.myDay ? 'Ajouté à My Day' : 'Retiré de My Day');
     }
+    
+    function openEditTask(id) {
+      const t = tasks.find(x => x.id === id); if (!t) return;
+      editingTask = t; captureType = 'task';
+      document.getElementById('modal-title').textContent = '✏️ Modifier';
+      document.getElementById('type-btns').classList.add('hidden');
+      document.getElementById('captureInput').value = t.title;
+      document.getElementById('taskMyDay').checked = t.myDay;
+      document.getElementById('taskProject').value = t.projectId || '';
+      document.getElementById('taskDueDate').value = t.dueDate || '';
+      taskPriority = t.priority; updatePriorityButtons();
+      document.getElementById('submitBtn').textContent = 'Enregistrer';
+      document.getElementById('deleteBtn').classList.remove('hidden');
+      updateCaptureUI();
+      document.getElementById('modal').classList.add('open');
+    }
+    
+    function askDelete(id) {
+      const t = tasks.find(x => x.id === id); if (!t) return;
+      taskToDelete = id;
+      document.getElementById('confirm-task-name').textContent = `"${t.title}"`;
+      document.getElementById('confirmDialog').classList.add('open');
+    }
+    
+    function closeConfirm() { taskToDelete = null; document.getElementById('confirmDialog').classList.remove('open'); }
+    
+    function confirmDelete() {
+      if (!taskToDelete) return;
+      tasks = tasks.filter(t => t.id !== taskToDelete);
+      renderTasks(); deleteTaskAPI(taskToDelete); closeConfirm();
+      document.getElementById('modal').classList.remove('open'); editingTask = null;
+    }
+    
+    function deleteCurrentTask() { if (editingTask) askDelete(editingTask.id); }
 
+    // OTHER RENDERS
     function renderNotes() {
       document.getElementById('notes-list').innerHTML = notes.length ? notes.map(n => `
         <div class="card" style="border-left-color: ${noteTypeColors[n.type] || '#6b7280'}">
@@ -1049,14 +543,13 @@
             <span>${formatDate(n.date)}</span>
           </div>
         </div>
-      `).join('') : '<div class="empty">📝 Aucune note<br><small>Capture tes idées ici</small></div>';
+      `).join('') : '<div class="empty">📝 Aucune note</div>';
     }
 
     function renderEvents() {
       const sorted = [...events].sort((a, b) => new Date(a.date) - new Date(b.date));
       const today = new Date().toISOString().split('T')[0];
       const tomorrow = new Date(Date.now() + 86400000).toISOString().split('T')[0];
-      
       document.getElementById('events-list').innerHTML = sorted.length ? sorted.map(e => `
         <div class="card">
           <div class="card-title">${e.title}</div>
@@ -1067,163 +560,83 @@
             ${e.date === tomorrow ? '<span class="badge badge-tomorrow">Demain</span>' : ''}
           </div>
         </div>
-      `).join('') : '<div class="empty">📅 Aucun événement<br><small>Ton agenda est libre</small></div>';
+      `).join('') : '<div class="empty">📅 Aucun événement</div>';
     }
 
     function renderProjects() {
-      if (projects.length === 0) {
-        document.getElementById('projects-list').innerHTML = '<div class="empty">🚀 Aucun projet<br><small>Lance ton premier projet</small></div>';
-        return;
-      }
-      document.getElementById('projects-list').innerHTML = projects.map(p => {
+      document.getElementById('projects-list').innerHTML = projects.length ? projects.map(p => {
         const pct = p.total > 0 ? Math.round((p.done / p.total) * 100) : 0;
         return `
-          <div class="card">
+          <div class="card" onclick="filterByProject('${p.id}')">
             <div class="card-title">${p.name}</div>
             <div class="card-meta">
               <span class="badge">${p.status}</span>
               <span>${p.done}/${p.total} tâches</span>
               <span>${pct}%</span>
             </div>
-            <div class="project-progress">
-              <div class="project-progress-bar" style="width: ${pct}%"></div>
-            </div>
+            <div class="project-progress"><div class="project-progress-bar" style="width: ${pct}%"></div></div>
           </div>
         `;
-      }).join('');
+      }).join('') : '<div class="empty">🚀 Aucun projet</div>';
+    }
+    
+    function filterByProject(id) {
+      document.querySelector('[data-tab="today"]').click();
+      document.getElementById('project-filter').value = id;
+      projectFilter = id; renderTasks();
+      showToast(`Filtre: ${projectsMap[id]}`);
     }
 
     function renderPipeline() {
-      if (people.length === 0) {
-        document.getElementById('pipeline').innerHTML = '<div class="empty" style="width:100%">👥 Aucun contact<br><small>Ajoute tes premiers contacts</small></div>';
-        return;
-      }
       const stages = ['Prospect', 'Contacted', 'Negotiating', 'Closed'];
-      document.getElementById('pipeline').innerHTML = stages.map(stage => {
-        const ps = people.filter(p => p.status === stage);
-        return `
-          <div class="pipeline-col">
-            <div class="pipeline-header">
-              <span class="pipeline-dot" style="background: ${pipelineColors[stage]}"></span>
-              ${stage} (${ps.length})
-            </div>
-            ${ps.map(p => `
-              <div class="pipeline-card">
-                <h4>${p.name}</h4>
-                ${p.company ? `<p>${p.company}</p>` : ''}
-                ${p.role ? `<p>${p.role}</p>` : ''}
-                ${p.next ? `<p style="color:#a78bfa; margin-top:8px">📅 ${formatDate(p.next)}</p>` : ''}
-              </div>
-            `).join('')}
-          </div>
-        `;
-      }).join('');
+      document.getElementById('pipeline').innerHTML = people.length ? stages.map(s => `
+        <div class="pipeline-col">
+          <div class="pipeline-header"><span class="pipeline-dot" style="background: ${pipelineColors[s]}"></span>${s} (${people.filter(p => p.status === s).length})</div>
+          ${people.filter(p => p.status === s).map(p => `<div class="pipeline-card"><h4>${p.name}</h4></div>`).join('')}
+        </div>
+      `).join('') : '<div class="empty" style="width:100%">👥 Aucun contact</div>';
     }
 
-    function formatDate(dateStr) {
-      if (!dateStr) return '';
-      const d = new Date(dateStr);
-      return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
-    }
+    function formatDate(d) { return d ? new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : ''; }
 
-    // ==========================================
     // MODAL
-    // ==========================================
     function openCapture(type) {
-      captureType = type;
+      editingTask = null; captureType = type;
+      document.getElementById('modal-title').textContent = '⚡ Capture rapide';
+      document.getElementById('type-btns').classList.remove('hidden');
+      document.getElementById('captureInput').value = '';
+      document.getElementById('taskMyDay').checked = true;
+      document.getElementById('taskProject').value = '';
+      document.getElementById('taskDueDate').value = '';
+      document.getElementById('submitBtn').textContent = 'Ajouter';
+      document.getElementById('deleteBtn').classList.add('hidden');
+      taskPriority = 'Medium'; updatePriorityButtons(); updateTypeButtons(); updateCaptureUI();
       document.getElementById('modal').classList.add('open');
       document.getElementById('captureInput').focus();
-      updateTypeButtons();
-      updateCaptureUI();
     }
 
-    function closeModal(e) {
-      if (e.target.id === 'modal') {
-        document.getElementById('modal').classList.remove('open');
-        document.getElementById('captureInput').value = '';
-        document.getElementById('taskDueDate').value = '';
-        document.getElementById('taskMyDay').checked = true;
-        taskPriority = 'Medium';
-        updatePriorityButtons();
-      }
-    }
-
-    function updateTypeButtons() {
-      document.querySelectorAll('.type-btn[data-type]').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.type === captureType);
-      });
-    }
-    
-    function updatePriorityButtons() {
-      document.querySelectorAll('.priority-btn').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.priority === taskPriority);
-      });
-    }
+    function closeModal(e) { if (e.target.id === 'modal') { document.getElementById('modal').classList.remove('open'); editingTask = null; } }
+    function updateTypeButtons() { document.querySelectorAll('.type-btn[data-type]').forEach(b => b.classList.toggle('active', b.dataset.type === captureType)); }
+    function updatePriorityButtons() { document.querySelectorAll('.priority-btn').forEach(b => b.classList.toggle('active', b.dataset.priority === taskPriority)); }
 
     function updateCaptureUI() {
       const input = document.getElementById('captureInput');
-      const taskOpts = document.getElementById('taskOptions');
-      const noteOpts = document.getElementById('noteOptions');
-      const eventOpts = document.getElementById('eventOptions');
-      
-      taskOpts.classList.add('hidden');
-      noteOpts.classList.add('hidden');
-      eventOpts.classList.add('hidden');
-      
-      if (captureType === 'task') {
-        input.placeholder = 'Nouvelle tâche...';
-        taskOpts.classList.remove('hidden');
-      } else if (captureType === 'note') {
-        input.placeholder = 'Titre de la note...';
-        noteOpts.classList.remove('hidden');
-      } else if (captureType === 'event') {
-        input.placeholder = "Titre de l'événement...";
-        eventOpts.classList.remove('hidden');
-        document.getElementById('eventDate').value = new Date().toISOString().split('T')[0];
-      } else if (captureType === 'project') {
-        input.placeholder = 'Nom du projet...';
-      } else if (captureType === 'contact') {
-        input.placeholder = 'Nom du contact...';
-      }
+      ['taskOptions', 'noteOptions', 'eventOptions'].forEach(id => document.getElementById(id).classList.add('hidden'));
+      if (captureType === 'task') { input.placeholder = 'Nouvelle tâche...'; document.getElementById('taskOptions').classList.remove('hidden'); }
+      else if (captureType === 'note') { input.placeholder = 'Titre de la note...'; document.getElementById('noteOptions').classList.remove('hidden'); }
+      else if (captureType === 'event') { input.placeholder = "Titre de l'événement..."; document.getElementById('eventOptions').classList.remove('hidden'); document.getElementById('eventDate').value = new Date().toISOString().split('T')[0]; }
+      else if (captureType === 'project') input.placeholder = 'Nom du projet...';
+      else if (captureType === 'contact') input.placeholder = 'Nom du contact...';
     }
 
-    // Type buttons
-    document.querySelectorAll('.type-btn[data-type]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        captureType = btn.dataset.type;
-        updateTypeButtons();
-        updateCaptureUI();
-      });
-    });
-    
-    // Priority buttons
-    document.querySelectorAll('.priority-btn').forEach(btn => {
-      btn.addEventListener('click', () => {
-        taskPriority = btn.dataset.priority;
-        updatePriorityButtons();
-      });
-    });
+    document.querySelectorAll('.type-btn[data-type]').forEach(b => b.addEventListener('click', () => { captureType = b.dataset.type; updateTypeButtons(); updateCaptureUI(); }));
+    document.querySelectorAll('.priority-btn').forEach(b => b.addEventListener('click', () => { taskPriority = b.dataset.priority; updatePriorityButtons(); }));
+    document.querySelectorAll('.type-btn[data-notetype]').forEach(b => b.addEventListener('click', () => { noteType = b.dataset.notetype; document.querySelectorAll('.type-btn[data-notetype]').forEach(x => x.classList.remove('active')); b.classList.add('active'); }));
 
-    // Note type buttons
-    document.querySelectorAll('.type-btn[data-notetype]').forEach(btn => {
-      btn.addEventListener('click', () => {
-        noteType = btn.dataset.notetype;
-        document.querySelectorAll('.type-btn[data-notetype]').forEach(b => b.classList.remove('active'));
-        btn.classList.add('active');
-      });
-    });
-
-    // ==========================================
     // CAPTURE
-    // ==========================================
     async function capture() {
-      const input = document.getElementById('captureInput');
-      const text = input.value.trim();
-      if (!text) return;
-
-      const btn = document.getElementById('submitBtn');
-      btn.disabled = true;
-      btn.textContent = 'Envoi...';
+      const text = document.getElementById('captureInput').value.trim(); if (!text) return;
+      const btn = document.getElementById('submitBtn'); btn.disabled = true; btn.textContent = editingTask ? 'Sauvegarde...' : 'Envoi...';
 
       try {
         if (captureType === 'task') {
@@ -1231,110 +644,46 @@
           const myDay = document.getElementById('taskMyDay').checked;
           const dueDate = document.getElementById('taskDueDate').value;
           
-          // Add locally first
-          const tempId = 't' + Date.now();
-          tasks.unshift({ 
-            id: tempId, 
-            title: text, 
-            done: false, 
-            priority: taskPriority, 
-            myDay,
-            project: projectsMap[projectId] || null,
-            projectId,
-            dueDate: dueDate || null
-          });
+          if (editingTask) {
+            Object.assign(editingTask, { title: text, priority: taskPriority, myDay, project: projectsMap[projectId] || null, projectId, dueDate: dueDate || null });
+            fetch(N8N_UPDATE_TASK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ taskId: editingTask.id, myDay }) }).catch(() => {});
+            showToast('Tâche modifiée');
+          } else {
+            const tempId = 't' + Date.now();
+            tasks.unshift({ id: tempId, title: text, done: false, priority: taskPriority, myDay, project: projectsMap[projectId] || null, projectId, dueDate: dueDate || null });
+            fetch(N8N_CREATE_TASK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: text, priority: taskPriority, projectId, myDay, dueDate }) }).then(r => r.json()).then(d => { const t = tasks.find(x => x.id === tempId); if (t && d.taskId) t.id = d.taskId; }).catch(() => {});
+            launchConfetti(); showToast('Tâche créée !');
+          }
           renderTasks();
-          
-          // Send to n8n
-          fetch(N8N_CREATE_TASK_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ 
-              title: text,
-              priority: taskPriority,
-              projectId,
-              myDay,
-              dueDate
-            })
-          }).then(res => res.json()).then(data => {
-            const task = tasks.find(t => t.id === tempId);
-            if (task && data.taskId) task.id = data.taskId;
-          }).catch(() => {});
-          
         } else if (captureType === 'note') {
           const project = document.getElementById('noteProject').value;
-          const note = { id: 'n' + Date.now(), title: text, type: noteType, project, date: new Date().toISOString().split('T')[0] };
-          notes.unshift(note);
+          notes.unshift({ id: 'n' + Date.now(), title: text, type: noteType, project, date: new Date().toISOString().split('T')[0] });
           renderNotes();
-          
-          fetch(N8N_NOTE_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ title: text, type: noteType, project })
-          }).catch(() => {});
-          
+          fetch(N8N_NOTE_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: text, type: noteType, project }) }).catch(() => {});
+          launchConfetti(); showToast('Note créée !');
         } else if (captureType === 'event') {
-          const date = document.getElementById('eventDate').value;
-          const time = document.getElementById('eventTime').value;
+          const date = document.getElementById('eventDate').value, time = document.getElementById('eventTime').value;
           if (!date) { alert('Choisis une date'); btn.disabled = false; btn.textContent = 'Ajouter'; return; }
-          
-          events.push({ id: 'e' + Date.now(), title: text, date, time });
-          renderEvents();
-          
-          const startTime = time ? `${date}T${time}:00` : `${date}T09:00:00`;
-          fetch(N8N_EVENT_URL, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ title: text, startTime })
-          }).catch(() => {});
-          
+          events.push({ id: 'e' + Date.now(), title: text, date, time }); renderEvents();
+          fetch(N8N_EVENT_URL, { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ title: text, startTime: time ? `${date}T${time}:00` : `${date}T09:00:00` }) }).catch(() => {});
+          launchConfetti(); showToast('Événement créé !');
         } else if (captureType === 'project') {
           projects.push({ id: 'p' + Date.now(), name: text, status: 'Planned', total: 0, done: 0 });
-          renderProjects();
-          updateProjectDropdowns();
-          
+          renderProjects(); updateProjectDropdowns(); launchConfetti(); showToast('Projet créé !');
         } else if (captureType === 'contact') {
           people.push({ id: 'c' + Date.now(), name: text, status: 'Prospect' });
-          renderPipeline();
+          renderPipeline(); launchConfetti(); showToast('Contact ajouté !');
         }
-
-        // Celebration
-        launchConfetti();
-        document.getElementById('modal').classList.remove('open');
-        input.value = '';
-        document.getElementById('taskDueDate').value = '';
-        document.getElementById('taskMyDay').checked = true;
-        taskPriority = 'Medium';
-        updatePriorityButtons();
-        
-      } finally {
-        btn.disabled = false;
-        btn.textContent = 'Ajouter';
-      }
+        document.getElementById('modal').classList.remove('open'); editingTask = null;
+      } finally { btn.disabled = false; btn.textContent = 'Ajouter'; }
     }
 
-    // Enter key
-    document.getElementById('captureInput').addEventListener('keydown', e => {
-      if (e.key === 'Enter') capture();
-    });
+    document.getElementById('captureInput').addEventListener('keydown', e => { if (e.key === 'Enter') capture(); });
 
-    // ==========================================
     // INIT
-    // ==========================================
-    updateGreeting();
-    updatePriorityButtons();
-    
-    renderTasks();
-    renderNotes();
-    renderEvents();
-    renderProjects();
-    renderPipeline();
-    
-    // Fetch real data
-    (async () => {
-      await fetchProjects();
-      await fetchTasks();
-    })();
+    updateGreeting(); updatePriorityButtons();
+    renderTasks(); renderNotes(); renderEvents(); renderProjects(); renderPipeline();
+    (async () => { await fetchProjects(); await fetchTasks(); })();
   </script>
 </body>
 </html>

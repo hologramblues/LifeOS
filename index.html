@@ -28,6 +28,18 @@
       padding-bottom: env(safe-area-inset-bottom);
       overflow-x: hidden;
     }
+    
+    /* Confetti Canvas */
+    #confetti-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      pointer-events: none;
+      z-index: 500;
+    }
+    
     .header {
       padding: 16px 20px 12px;
       background: rgba(15, 23, 42, 0.8);
@@ -51,6 +63,44 @@
       font-weight: 600;
       margin-left: 8px;
     }
+    
+    /* Filter bar */
+    .filters {
+      display: flex;
+      gap: 8px;
+      padding: 12px 16px;
+      background: rgba(0,0,0,0.2);
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+    }
+    .filters::-webkit-scrollbar { display: none; }
+    .filter-chip {
+      flex: 0 0 auto;
+      padding: 8px 14px;
+      border-radius: 20px;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: transparent;
+      color: rgba(255,255,255,0.6);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .filter-chip.active {
+      background: rgba(139, 92, 246, 0.3);
+      border-color: #8b5cf6;
+      color: white;
+    }
+    .filter-chip .count {
+      background: rgba(255,255,255,0.2);
+      padding: 2px 6px;
+      border-radius: 10px;
+      font-size: 11px;
+    }
+    
     .tabs {
       display: flex;
       gap: 4px;
@@ -93,7 +143,7 @@
     }
     .card:active { transform: scale(0.98); background: rgba(255,255,255,0.06); }
     .card-title { font-weight: 600; font-size: 15px; margin-bottom: 6px; }
-    .card-meta { display: flex; gap: 12px; font-size: 12px; color: rgba(255,255,255,0.4); flex-wrap: wrap; }
+    .card-meta { display: flex; gap: 8px; font-size: 12px; color: rgba(255,255,255,0.4); flex-wrap: wrap; align-items: center; }
     .card-meta span { display: flex; align-items: center; gap: 4px; }
     .priority-high { border-left-color: #ef4444; }
     .priority-medium { border-left-color: #f59e0b; }
@@ -113,6 +163,41 @@
     .task-row { display: flex; align-items: flex-start; gap: 12px; }
     .task-content { flex: 1; min-width: 0; }
     .task-title.done { text-decoration: line-through; opacity: 0.5; }
+    
+    /* My Day badge */
+    .myday-badge {
+      background: rgba(251, 191, 36, 0.2);
+      color: #fbbf24;
+      padding: 2px 8px;
+      border-radius: 6px;
+      font-size: 11px;
+      font-weight: 600;
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+    }
+    
+    /* Task actions */
+    .task-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+    .task-action-btn {
+      padding: 6px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: transparent;
+      color: rgba(255,255,255,0.6);
+      font-size: 12px;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .task-action-btn:active { background: rgba(255,255,255,0.1); }
+    .task-action-btn.active { background: rgba(251, 191, 36, 0.2); border-color: #fbbf24; color: #fbbf24; }
+    
     .section-title {
       font-size: 13px;
       font-weight: 600;
@@ -287,29 +372,142 @@
     .note-types { margin: 12px 0; }
     .note-types p { font-size: 12px; color: rgba(255,255,255,0.4); margin-bottom: 8px; }
     .hidden { display: none !important; }
-    .celebration {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 80px;
-      z-index: 400;
-      animation: pop 0.6s ease-out forwards;
-      pointer-events: none;
+    
+    /* Task options in modal */
+    .task-options {
+      margin: 12px 0;
     }
-    @keyframes pop {
-      0% { transform: translate(-50%, -50%) scale(0); opacity: 1; }
-      50% { transform: translate(-50%, -50%) scale(1.2); opacity: 1; }
-      100% { transform: translate(-50%, -50%) scale(1); opacity: 0; }
+    .task-options label {
+      display: block;
+      font-size: 12px;
+      color: rgba(255,255,255,0.4);
+      margin-bottom: 6px;
     }
+    .priority-btns {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 12px;
+    }
+    .priority-btn {
+      flex: 1;
+      padding: 10px;
+      border-radius: 10px;
+      border: 1px solid rgba(255,255,255,0.15);
+      background: transparent;
+      color: rgba(255,255,255,0.6);
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    .priority-btn.active { border-width: 2px; }
+    .priority-btn[data-priority="High"].active { 
+      background: rgba(239, 68, 68, 0.2); 
+      border-color: #ef4444; 
+      color: #ef4444; 
+    }
+    .priority-btn[data-priority="Medium"].active { 
+      background: rgba(245, 158, 11, 0.2); 
+      border-color: #f59e0b; 
+      color: #f59e0b; 
+    }
+    .priority-btn[data-priority="Low"].active { 
+      background: rgba(107, 114, 128, 0.2); 
+      border-color: #6b7280; 
+      color: #9ca3af; 
+    }
+    
+    .myday-toggle {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.05);
+      margin-bottom: 12px;
+      cursor: pointer;
+    }
+    .myday-toggle input { display: none; }
+    .myday-toggle .toggle-track {
+      width: 44px;
+      height: 24px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.2);
+      position: relative;
+      transition: all 0.2s;
+    }
+    .myday-toggle input:checked + .toggle-track {
+      background: #fbbf24;
+    }
+    .myday-toggle .toggle-thumb {
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: white;
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      transition: all 0.2s;
+    }
+    .myday-toggle input:checked + .toggle-track .toggle-thumb {
+      left: 22px;
+    }
+    .myday-toggle span {
+      font-size: 14px;
+      color: rgba(255,255,255,0.8);
+    }
+    
     .empty { text-align: center; padding: 40px 20px; color: rgba(255,255,255,0.3); }
+    
+    /* Stats bar */
+    .stats-bar {
+      display: flex;
+      gap: 16px;
+      padding: 12px 16px;
+      background: rgba(0,0,0,0.3);
+      overflow-x: auto;
+    }
+    .stat-item {
+      text-align: center;
+      flex: 0 0 auto;
+    }
+    .stat-value {
+      font-size: 24px;
+      font-weight: 700;
+      background: linear-gradient(135deg, #8b5cf6, #6366f1);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .stat-label {
+      font-size: 11px;
+      color: rgba(255,255,255,0.4);
+      margin-top: 2px;
+    }
   </style>
 </head>
 <body>
+  <canvas id="confetti-canvas"></canvas>
+  
   <header class="header">
-    <h1>Life OS <span class="streak">🔥 7</span></h1>
+    <h1>Life OS <span class="streak" id="streak">🔥 0</span></h1>
     <p id="greeting">Bonjour Jeremie</p>
   </header>
+
+  <!-- Stats bar -->
+  <div class="stats-bar" id="stats-bar">
+    <div class="stat-item">
+      <div class="stat-value" id="stat-done">0</div>
+      <div class="stat-label">Faites</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value" id="stat-todo">0</div>
+      <div class="stat-label">À faire</div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-value" id="stat-myday">0</div>
+      <div class="stat-label">My Day</div>
+    </div>
+  </div>
 
   <nav class="tabs">
     <button class="tab active" data-tab="today">✓ Today</button>
@@ -318,6 +516,14 @@
     <button class="tab" data-tab="projects">🚀 Projets</button>
     <button class="tab" data-tab="people">👥 CRM</button>
   </nav>
+
+  <!-- Filters (only on Today tab) -->
+  <div class="filters" id="filters">
+    <button class="filter-chip active" data-filter="all">Toutes <span class="count" id="count-all">0</span></button>
+    <button class="filter-chip" data-filter="myday">☀️ My Day <span class="count" id="count-myday">0</span></button>
+    <button class="filter-chip" data-filter="high">🔥 Urgentes <span class="count" id="count-high">0</span></button>
+    <button class="filter-chip" data-filter="todo">⏳ À faire <span class="count" id="count-todo">0</span></button>
+  </div>
 
   <main class="content">
     <!-- TODAY -->
@@ -367,6 +573,30 @@
       </div>
       <input type="text" class="input" id="captureInput" placeholder="Qu'est-ce que tu veux capturer ?">
       
+      <!-- Task options -->
+      <div id="taskOptions" class="task-options">
+        <label>Priorité</label>
+        <div class="priority-btns">
+          <button class="priority-btn" data-priority="High">🔥 High</button>
+          <button class="priority-btn active" data-priority="Medium">⚡ Medium</button>
+          <button class="priority-btn" data-priority="Low">💤 Low</button>
+        </div>
+        
+        <label>Projet</label>
+        <select class="input" id="taskProject">
+          <option value="">📁 Aucun projet</option>
+        </select>
+        
+        <label class="myday-toggle">
+          <input type="checkbox" id="taskMyDay" checked>
+          <div class="toggle-track"><div class="toggle-thumb"></div></div>
+          <span>☀️ Ajouter à My Day</span>
+        </label>
+        
+        <label>Date d'échéance (optionnel)</label>
+        <input type="date" class="input" id="taskDueDate">
+      </div>
+      
       <!-- Note type selector -->
       <div id="noteOptions" class="note-types hidden">
         <p>Type de note</p>
@@ -394,10 +624,98 @@
     </div>
   </div>
 
-  <div class="celebration hidden" id="celebration">🎉</div>
-
   <script>
-    // Config - n8n webhooks
+    // ==========================================
+    // CONFETTI SYSTEM
+    // ==========================================
+    const confettiCanvas = document.getElementById('confetti-canvas');
+    const confettiCtx = confettiCanvas.getContext('2d');
+    let confettiPieces = [];
+    let confettiAnimating = false;
+    
+    function resizeConfettiCanvas() {
+      confettiCanvas.width = window.innerWidth;
+      confettiCanvas.height = window.innerHeight;
+    }
+    resizeConfettiCanvas();
+    window.addEventListener('resize', resizeConfettiCanvas);
+    
+    class ConfettiPiece {
+      constructor(x, y) {
+        this.x = x;
+        this.y = y;
+        this.size = Math.random() * 10 + 5;
+        this.speedX = Math.random() * 6 - 3;
+        this.speedY = Math.random() * -15 - 5;
+        this.gravity = 0.5;
+        this.rotation = Math.random() * 360;
+        this.rotationSpeed = Math.random() * 10 - 5;
+        this.color = ['#8b5cf6', '#6366f1', '#22c55e', '#fbbf24', '#ef4444', '#ec4899'][Math.floor(Math.random() * 6)];
+        this.opacity = 1;
+        this.shape = Math.random() > 0.5 ? 'rect' : 'circle';
+      }
+      
+      update() {
+        this.x += this.speedX;
+        this.y += this.speedY;
+        this.speedY += this.gravity;
+        this.rotation += this.rotationSpeed;
+        this.opacity -= 0.01;
+      }
+      
+      draw() {
+        confettiCtx.save();
+        confettiCtx.translate(this.x, this.y);
+        confettiCtx.rotate(this.rotation * Math.PI / 180);
+        confettiCtx.globalAlpha = this.opacity;
+        confettiCtx.fillStyle = this.color;
+        
+        if (this.shape === 'rect') {
+          confettiCtx.fillRect(-this.size / 2, -this.size / 4, this.size, this.size / 2);
+        } else {
+          confettiCtx.beginPath();
+          confettiCtx.arc(0, 0, this.size / 2, 0, Math.PI * 2);
+          confettiCtx.fill();
+        }
+        
+        confettiCtx.restore();
+      }
+    }
+    
+    function launchConfetti(x, y) {
+      for (let i = 0; i < 50; i++) {
+        confettiPieces.push(new ConfettiPiece(x || window.innerWidth / 2, y || window.innerHeight / 2));
+      }
+      
+      if (!confettiAnimating) {
+        confettiAnimating = true;
+        animateConfetti();
+      }
+      
+      // Haptic feedback
+      if (navigator.vibrate) navigator.vibrate([10, 50, 10]);
+    }
+    
+    function animateConfetti() {
+      confettiCtx.clearRect(0, 0, confettiCanvas.width, confettiCanvas.height);
+      
+      confettiPieces = confettiPieces.filter(p => p.opacity > 0 && p.y < confettiCanvas.height);
+      
+      confettiPieces.forEach(p => {
+        p.update();
+        p.draw();
+      });
+      
+      if (confettiPieces.length > 0) {
+        requestAnimationFrame(animateConfetti);
+      } else {
+        confettiAnimating = false;
+      }
+    }
+
+    // ==========================================
+    // CONFIG
+    // ==========================================
     const N8N_BASE = '/api/n8n?endpoint=';
     const N8N_NOTE_URL = 'https://hologramblues.app.n8n.cloud/webhook/lifeos-note';
     const N8N_EVENT_URL = 'https://hologramblues.app.n8n.cloud/webhook/lifeos-event';
@@ -405,13 +723,19 @@
     const N8N_PROJECTS_URL = `${N8N_BASE}lifeos-projects`;
     const N8N_TOGGLE_URL = `${N8N_BASE}lifeos-toggle`;
     const N8N_CREATE_TASK_URL = `${N8N_BASE}lifeos-create-task`;
+    const N8N_UPDATE_TASK_URL = `${N8N_BASE}lifeos-update-task`;
 
-    // State
+    // ==========================================
+    // STATE
+    // ==========================================
     let currentTab = 'today';
+    let currentFilter = 'all';
     let captureType = 'task';
     let noteType = 'Idea';
+    let taskPriority = 'Medium';
     let isLoading = false;
-    let projectsMap = {}; // id -> name mapping
+    let projectsMap = {};
+    let completedToday = 0;
     
     let tasks = [];
     let notes = [];
@@ -423,7 +747,9 @@
     const noteTypeColors = { Idea: '#f59e0b', Reference: '#6b7280', Meeting: '#eab308', Journal: '#8b5cf6', Plan: '#3b82f6' };
     const pipelineColors = { Prospect: '#6b7280', Contacted: '#3b82f6', Negotiating: '#f59e0b', Closed: '#22c55e' };
 
-    // Greeting
+    // ==========================================
+    // GREETING & STATS
+    // ==========================================
     function updateGreeting() {
       const hour = new Date().getHours();
       let greeting = 'Bonjour';
@@ -431,10 +757,30 @@
       else if (hour >= 12) greeting = 'Bon après-midi';
       document.getElementById('greeting').textContent = `${greeting} Jeremie`;
     }
-
-    // === API FUNCTIONS ===
     
-    // Show/hide loading indicator
+    function updateStats() {
+      const done = tasks.filter(t => t.done).length;
+      const todo = tasks.filter(t => !t.done).length;
+      const myday = tasks.filter(t => t.myDay && !t.done).length;
+      const high = tasks.filter(t => t.priority === 'High' && !t.done).length;
+      
+      document.getElementById('stat-done').textContent = done;
+      document.getElementById('stat-todo').textContent = todo;
+      document.getElementById('stat-myday').textContent = myday;
+      
+      // Update filter counts
+      document.getElementById('count-all').textContent = tasks.length;
+      document.getElementById('count-myday').textContent = tasks.filter(t => t.myDay).length;
+      document.getElementById('count-high').textContent = high;
+      document.getElementById('count-todo').textContent = todo;
+      
+      // Update streak (simplified - just show completed today)
+      document.getElementById('streak').textContent = `🔥 ${completedToday}`;
+    }
+
+    // ==========================================
+    // API FUNCTIONS
+    // ==========================================
     function setLoading(loading) {
       isLoading = loading;
       const header = document.querySelector('.header');
@@ -453,7 +799,6 @@
       }
     }
 
-    // Fetch tasks from Notion via n8n
     async function fetchTasks() {
       try {
         setLoading(true);
@@ -470,20 +815,20 @@
             project: projectsMap[t.project] || null,
             projectId: t.project,
             time: t.dueDate ? new Date(t.dueDate).toLocaleTimeString('fr', { hour: '2-digit', minute: '2-digit' }) : null,
+            dueDate: t.dueDate,
             myDay: t.myDay || false
           }));
           renderTasks();
+          updateStats();
         }
       } catch (err) {
         console.error('Fetch tasks error:', err);
-        // Show offline indicator
         document.getElementById('tasks-list').innerHTML = '<div class="empty">📡 Impossible de charger<br><small>Tire pour rafraîchir</small></div>';
       } finally {
         setLoading(false);
       }
     }
 
-    // Fetch projects from Notion via n8n
     async function fetchProjects() {
       try {
         const res = await fetch(N8N_PROJECTS_URL);
@@ -499,30 +844,28 @@
             total: p.tasksTotal || 0
           }));
           
-          // Build lookup map
           projectsMap = {};
           projects.forEach(p => projectsMap[p.id] = p.name);
           
           renderProjects();
-          updateProjectDropdown();
+          updateProjectDropdowns();
         }
       } catch (err) {
         console.error('Fetch projects error:', err);
       }
     }
 
-    // Update project dropdown in modal
-    function updateProjectDropdown() {
-      const select = document.getElementById('projectSelect');
-      if (!select) return;
+    function updateProjectDropdowns() {
+      const taskSelect = document.getElementById('taskProject');
+      const noteSelect = document.getElementById('noteProject');
       
-      const currentValue = select.value;
-      select.innerHTML = '<option value="">Aucun projet</option>' + 
+      const options = '<option value="">📁 Aucun projet</option>' + 
         projects.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
-      select.value = currentValue;
+      
+      if (taskSelect) taskSelect.innerHTML = options;
+      if (noteSelect) noteSelect.innerHTML = options;
     }
 
-    // Toggle task done status in Notion
     async function toggleTaskAPI(taskId, done) {
       try {
         await fetch(N8N_TOGGLE_URL, {
@@ -532,13 +875,28 @@
         });
       } catch (err) {
         console.error('Toggle error:', err);
-        // Revert on error
         tasks = tasks.map(t => t.id === taskId ? { ...t, done: !done } : t);
         renderTasks();
       }
     }
+    
+    async function toggleMyDayAPI(taskId, myDay) {
+      try {
+        await fetch(N8N_UPDATE_TASK_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ taskId, myDay })
+        });
+      } catch (err) {
+        console.error('Toggle My Day error:', err);
+        tasks = tasks.map(t => t.id === taskId ? { ...t, myDay: !myDay } : t);
+        renderTasks();
+      }
+    }
 
-    // Pull-to-refresh
+    // ==========================================
+    // PULL TO REFRESH
+    // ==========================================
     let touchStartY = 0;
     let isPulling = false;
     
@@ -564,16 +922,14 @@
       if (isPulling && !isLoading) {
         isPulling = false;
         document.querySelector('.header').style.transform = '';
-        
-        // Refresh data
         await Promise.all([fetchTasks(), fetchProjects()]);
-        
-        // Haptic feedback if available
         if (navigator.vibrate) navigator.vibrate(10);
       }
     });
 
-    // Tabs
+    // ==========================================
+    // TABS & FILTERS
+    // ==========================================
     document.querySelectorAll('.tab').forEach(tab => {
       tab.addEventListener('click', () => {
         document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
@@ -581,32 +937,70 @@
         tab.classList.add('active');
         currentTab = tab.dataset.tab;
         document.getElementById(currentTab).classList.remove('hidden');
+        
+        // Show/hide filters
+        document.getElementById('filters').style.display = currentTab === 'today' ? 'flex' : 'none';
+        document.getElementById('stats-bar').style.display = currentTab === 'today' ? 'flex' : 'none';
+      });
+    });
+    
+    document.querySelectorAll('.filter-chip').forEach(chip => {
+      chip.addEventListener('click', () => {
+        document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+        chip.classList.add('active');
+        currentFilter = chip.dataset.filter;
+        renderTasks();
       });
     });
 
-    // Render tasks
+    // ==========================================
+    // RENDER FUNCTIONS
+    // ==========================================
     function renderTasks() {
-      const sorted = [...tasks].sort((a, b) => {
+      let filtered = [...tasks];
+      
+      // Apply filter
+      switch (currentFilter) {
+        case 'myday':
+          filtered = filtered.filter(t => t.myDay);
+          break;
+        case 'high':
+          filtered = filtered.filter(t => t.priority === 'High' && !t.done);
+          break;
+        case 'todo':
+          filtered = filtered.filter(t => !t.done);
+          break;
+      }
+      
+      // Sort: undone first, then by priority
+      const sorted = filtered.sort((a, b) => {
         if (a.done !== b.done) return a.done ? 1 : -1;
         const order = { High: 0, Medium: 1, Low: 2 };
         return order[a.priority] - order[b.priority];
       });
       
       document.getElementById('tasks-list').innerHTML = sorted.map(t => `
-        <div class="card priority-${t.priority.toLowerCase()}" onclick="toggleTask('${t.id}')">
-          <div class="task-row">
+        <div class="card priority-${t.priority.toLowerCase()}" data-id="${t.id}">
+          <div class="task-row" onclick="toggleTask('${t.id}')">
             <div class="checkbox ${t.done ? 'done' : ''}">${t.done ? '✓' : ''}</div>
             <div class="task-content">
               <div class="card-title ${t.done ? 'task-title done' : ''}">${t.title}</div>
               <div class="card-meta">
+                ${t.myDay ? '<span class="myday-badge">☀️ My Day</span>' : ''}
                 ${t.project ? `<span>📁 ${t.project}</span>` : ''}
-                ${t.time ? `<span style="color:#f59e0b">🕐 ${t.time}</span>` : ''}
-                ${t.mins ? `<span>⏱ ${t.mins}min</span>` : ''}
+                ${t.dueDate ? `<span style="color:#f59e0b">📅 ${formatDate(t.dueDate)}</span>` : ''}
               </div>
             </div>
           </div>
+          <div class="task-actions">
+            <button class="task-action-btn ${t.myDay ? 'active' : ''}" onclick="event.stopPropagation(); toggleMyDay('${t.id}')">
+              ☀️ My Day
+            </button>
+          </div>
         </div>
       `).join('') || '<div class="empty">🎯 Aucune tâche<br><small>Appuie sur + pour en créer</small></div>';
+      
+      updateStats();
     }
 
     function toggleTask(id) {
@@ -617,13 +1011,34 @@
       tasks = tasks.map(t => t.id === id ? { ...t, done: newDone } : t);
       renderTasks();
       
-      // Sync with Notion
       toggleTaskAPI(id, newDone);
       
-      if (newDone) showCelebration();
+      if (newDone) {
+        completedToday++;
+        updateStats();
+        
+        // Get task card position for confetti
+        const card = document.querySelector(`[data-id="${id}"]`);
+        if (card) {
+          const rect = card.getBoundingClientRect();
+          launchConfetti(rect.left + rect.width / 2, rect.top);
+        } else {
+          launchConfetti();
+        }
+      }
+    }
+    
+    function toggleMyDay(id) {
+      const task = tasks.find(t => t.id === id);
+      if (!task) return;
+      
+      const newMyDay = !task.myDay;
+      tasks = tasks.map(t => t.id === id ? { ...t, myDay: newMyDay } : t);
+      renderTasks();
+      
+      toggleMyDayAPI(id, newMyDay);
     }
 
-    // Render notes
     function renderNotes() {
       document.getElementById('notes-list').innerHTML = notes.length ? notes.map(n => `
         <div class="card" style="border-left-color: ${noteTypeColors[n.type] || '#6b7280'}">
@@ -637,7 +1052,6 @@
       `).join('') : '<div class="empty">📝 Aucune note<br><small>Capture tes idées ici</small></div>';
     }
 
-    // Render events
     function renderEvents() {
       const sorted = [...events].sort((a, b) => new Date(a.date) - new Date(b.date));
       const today = new Date().toISOString().split('T')[0];
@@ -656,11 +1070,9 @@
       `).join('') : '<div class="empty">📅 Aucun événement<br><small>Ton agenda est libre</small></div>';
     }
 
-    // Render projects
     function renderProjects() {
       if (projects.length === 0) {
         document.getElementById('projects-list').innerHTML = '<div class="empty">🚀 Aucun projet<br><small>Lance ton premier projet</small></div>';
-        document.getElementById('noteProject').innerHTML = '<option value="">📁 Aucun projet</option>';
         return;
       }
       document.getElementById('projects-list').innerHTML = projects.map(p => {
@@ -679,13 +1091,8 @@
           </div>
         `;
       }).join('');
-
-      // Update project select
-      document.getElementById('noteProject').innerHTML = '<option value="">📁 Aucun projet</option>' +
-        projects.map(p => `<option value="${p.name}">${p.name}</option>`).join('');
     }
 
-    // Render pipeline
     function renderPipeline() {
       if (people.length === 0) {
         document.getElementById('pipeline').innerHTML = '<div class="empty" style="width:100%">👥 Aucun contact<br><small>Ajoute tes premiers contacts</small></div>';
@@ -714,11 +1121,14 @@
     }
 
     function formatDate(dateStr) {
+      if (!dateStr) return '';
       const d = new Date(dateStr);
       return d.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' });
     }
 
-    // Modal
+    // ==========================================
+    // MODAL
+    // ==========================================
     function openCapture(type) {
       captureType = type;
       document.getElementById('modal').classList.add('open');
@@ -731,6 +1141,10 @@
       if (e.target.id === 'modal') {
         document.getElementById('modal').classList.remove('open');
         document.getElementById('captureInput').value = '';
+        document.getElementById('taskDueDate').value = '';
+        document.getElementById('taskMyDay').checked = true;
+        taskPriority = 'Medium';
+        updatePriorityButtons();
       }
     }
 
@@ -739,24 +1153,33 @@
         btn.classList.toggle('active', btn.dataset.type === captureType);
       });
     }
+    
+    function updatePriorityButtons() {
+      document.querySelectorAll('.priority-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.priority === taskPriority);
+      });
+    }
 
     function updateCaptureUI() {
       const input = document.getElementById('captureInput');
+      const taskOpts = document.getElementById('taskOptions');
       const noteOpts = document.getElementById('noteOptions');
       const eventOpts = document.getElementById('eventOptions');
       
+      taskOpts.classList.add('hidden');
       noteOpts.classList.add('hidden');
       eventOpts.classList.add('hidden');
       
-      if (captureType === 'note') {
+      if (captureType === 'task') {
+        input.placeholder = 'Nouvelle tâche...';
+        taskOpts.classList.remove('hidden');
+      } else if (captureType === 'note') {
         input.placeholder = 'Titre de la note...';
         noteOpts.classList.remove('hidden');
       } else if (captureType === 'event') {
         input.placeholder = "Titre de l'événement...";
         eventOpts.classList.remove('hidden');
         document.getElementById('eventDate').value = new Date().toISOString().split('T')[0];
-      } else if (captureType === 'task') {
-        input.placeholder = 'Nouvelle tâche...';
       } else if (captureType === 'project') {
         input.placeholder = 'Nom du projet...';
       } else if (captureType === 'contact') {
@@ -772,6 +1195,14 @@
         updateCaptureUI();
       });
     });
+    
+    // Priority buttons
+    document.querySelectorAll('.priority-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        taskPriority = btn.dataset.priority;
+        updatePriorityButtons();
+      });
+    });
 
     // Note type buttons
     document.querySelectorAll('.type-btn[data-notetype]').forEach(btn => {
@@ -782,7 +1213,9 @@
       });
     });
 
-    // Capture
+    // ==========================================
+    // CAPTURE
+    // ==========================================
     async function capture() {
       const input = document.getElementById('captureInput');
       const text = input.value.trim();
@@ -794,33 +1227,52 @@
 
       try {
         if (captureType === 'task') {
-          // Add locally first for instant feedback
+          const projectId = document.getElementById('taskProject').value;
+          const myDay = document.getElementById('taskMyDay').checked;
+          const dueDate = document.getElementById('taskDueDate').value;
+          
+          // Add locally first
           const tempId = 't' + Date.now();
-          tasks.unshift({ id: tempId, title: text, done: false, priority: 'Medium', mins: 20 });
+          tasks.unshift({ 
+            id: tempId, 
+            title: text, 
+            done: false, 
+            priority: taskPriority, 
+            myDay,
+            project: projectsMap[projectId] || null,
+            projectId,
+            dueDate: dueDate || null
+          });
           renderTasks();
           
-          // Send to Notion via n8n
+          // Send to n8n
           fetch(N8N_CREATE_TASK_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ title: text })
+            body: JSON.stringify({ 
+              title: text,
+              priority: taskPriority,
+              projectId,
+              myDay,
+              dueDate
+            })
           }).then(res => res.json()).then(data => {
-            // Update local task with real Notion ID
             const task = tasks.find(t => t.id === tempId);
             if (task && data.taskId) task.id = data.taskId;
           }).catch(() => {});
+          
         } else if (captureType === 'note') {
           const project = document.getElementById('noteProject').value;
           const note = { id: 'n' + Date.now(), title: text, type: noteType, project, date: new Date().toISOString().split('T')[0] };
           notes.unshift(note);
           renderNotes();
           
-          // Send to n8n
           fetch(N8N_NOTE_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ title: text, type: noteType, project })
           }).catch(() => {});
+          
         } else if (captureType === 'event') {
           const date = document.getElementById('eventDate').value;
           const time = document.getElementById('eventTime').value;
@@ -829,34 +1281,36 @@
           events.push({ id: 'e' + Date.now(), title: text, date, time });
           renderEvents();
           
-          // Send to n8n
           const startTime = time ? `${date}T${time}:00` : `${date}T09:00:00`;
           fetch(N8N_EVENT_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ title: text, startTime })
           }).catch(() => {});
+          
         } else if (captureType === 'project') {
           projects.push({ id: 'p' + Date.now(), name: text, status: 'Planned', total: 0, done: 0 });
           renderProjects();
+          updateProjectDropdowns();
+          
         } else if (captureType === 'contact') {
           people.push({ id: 'c' + Date.now(), name: text, status: 'Prospect' });
           renderPipeline();
         }
 
-        showCelebration();
+        // Celebration
+        launchConfetti();
         document.getElementById('modal').classList.remove('open');
         input.value = '';
+        document.getElementById('taskDueDate').value = '';
+        document.getElementById('taskMyDay').checked = true;
+        taskPriority = 'Medium';
+        updatePriorityButtons();
+        
       } finally {
         btn.disabled = false;
         btn.textContent = 'Ajouter';
       }
-    }
-
-    function showCelebration() {
-      const el = document.getElementById('celebration');
-      el.classList.remove('hidden');
-      setTimeout(() => el.classList.add('hidden'), 600);
     }
 
     // Enter key
@@ -864,20 +1318,22 @@
       if (e.key === 'Enter') capture();
     });
 
-    // Init
+    // ==========================================
+    // INIT
+    // ==========================================
     updateGreeting();
+    updatePriorityButtons();
     
-    // Show empty state first, then fetch real data
     renderTasks();
     renderNotes();
     renderEvents();
     renderProjects();
     renderPipeline();
     
-    // Fetch real data from Notion
+    // Fetch real data
     (async () => {
-      await fetchProjects(); // First, get projects for mapping
-      await fetchTasks();    // Then get tasks with project names
+      await fetchProjects();
+      await fetchTasks();
     })();
   </script>
 </body>

@@ -1,0 +1,14 @@
+{
+  "rewrites": [
+    { "source": "/api/n8n", "destination": "/api/n8n" }
+  ],
+  "headers": [
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "X-Frame-Options", "value": "DENY" }
+      ]
+    }
+  ]
+}

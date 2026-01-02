@@ -9,7 +9,7 @@ export default async function handler(req, res) {
   }
 
   const { endpoint } = req.query;
-  const N8N_BASE = 'https://jeremiegalan.app.n8n.cloud/webhook';
+  const N8N_BASE = 'https://hologramblues.app.n8n.cloud/webhook';
   
   const allowedEndpoints = [
     'lifeos-tasks',

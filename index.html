@@ -83,14 +83,6 @@
     .badge-today { background: rgba(34, 197, 94, 0.2); color: #4ade80; }
     .badge-tomorrow { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
     
-    .pipeline { display: flex; gap: 12px; overflow-x: auto; padding-bottom: 16px; }
-    .pipeline-col { flex: 0 0 200px; }
-    .pipeline-header { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; font-size: 13px; font-weight: 600; color: rgba(255,255,255,0.6); }
-    .pipeline-dot { width: 8px; height: 8px; border-radius: 50%; }
-    .pipeline-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 12px; margin-bottom: 8px; }
-    .pipeline-card h4 { font-size: 14px; font-weight: 600; margin-bottom: 4px; }
-    .pipeline-card p { font-size: 12px; color: rgba(255,255,255,0.4); }
-    
     .project-progress { height: 4px; background: rgba(255,255,255,0.1); border-radius: 2px; margin-top: 10px; overflow: hidden; }
     .project-progress-bar { height: 100%; background: linear-gradient(90deg, #8b5cf6, #6366f1); border-radius: 2px; transition: width 0.3s; }
     
@@ -153,6 +145,47 @@
     .confirm-btns button { flex: 1; padding: 12px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; border: none; }
     .confirm-cancel { background: rgba(255,255,255,0.1); color: white; }
     .confirm-delete { background: #ef4444; color: white; }
+    
+    /* HABITS */
+    .habits-header { margin-bottom: 16px; }
+    .habits-progress { background: rgba(255,255,255,0.05); border-radius: 16px; padding: 16px; }
+    .habits-progress-text { display: flex; align-items: baseline; gap: 4px; margin-bottom: 8px; }
+    .habits-progress-text span:first-child { font-size: 32px; font-weight: 700; background: linear-gradient(135deg, #22c55e, #16a34a); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+    .habits-progress-text span:last-child { font-size: 18px; color: rgba(255,255,255,0.4); }
+    .habits-progress-bar { height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; }
+    .habits-progress-fill { height: 100%; background: linear-gradient(90deg, #22c55e, #16a34a); border-radius: 4px; transition: width 0.3s; }
+    
+    .protocol-selector { display: flex; gap: 8px; margin-bottom: 16px; overflow-x: auto; padding-bottom: 4px; }
+    .protocol-chip { flex: 0 0 auto; padding: 10px 16px; border-radius: 12px; border: 1px solid rgba(255,255,255,0.15); background: transparent; color: rgba(255,255,255,0.6); font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 6px; }
+    .protocol-chip.active { background: rgba(34, 197, 94, 0.2); border-color: #22c55e; color: #22c55e; }
+    .protocol-chip .edit-protocol { opacity: 0; font-size: 12px; margin-left: 4px; }
+    .protocol-chip:hover .edit-protocol, .protocol-chip.active .edit-protocol { opacity: 0.6; }
+    
+    .habit-card { background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 16px; margin-bottom: 10px; display: flex; align-items: center; gap: 14px; cursor: pointer; transition: all 0.2s; }
+    .habit-card:active { background: rgba(255,255,255,0.06); }
+    .habit-card.done { opacity: 0.6; }
+    .habit-card.done .habit-check { background: #22c55e; border-color: #22c55e; }
+    
+    .habit-check { width: 28px; height: 28px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.3); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.2s; font-size: 14px; }
+    .habit-content { flex: 1; }
+    .habit-name { font-weight: 600; font-size: 15px; margin-bottom: 2px; }
+    .habit-meta { font-size: 12px; color: rgba(255,255,255,0.4); display: flex; gap: 10px; }
+    .habit-streak { display: flex; align-items: center; gap: 4px; color: #f59e0b; font-weight: 600; }
+    .habit-time { color: rgba(255,255,255,0.3); }
+    
+    .protocol-modal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.9); z-index: 310; overflow-y: auto; }
+    .protocol-modal.open { display: block; }
+    .protocol-modal-content { background: linear-gradient(135deg, #1e293b, #0f172a); min-height: 100%; padding: 20px; padding-top: calc(20px + env(safe-area-inset-top)); }
+    .protocol-modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .protocol-modal-header h3 { font-size: 20px; }
+    .close-protocol { background: none; border: none; color: rgba(255,255,255,0.6); font-size: 24px; cursor: pointer; padding: 8px; }
+    
+    .habit-item-edit { background: rgba(255,255,255,0.05); border-radius: 12px; padding: 12px; margin-bottom: 10px; display: flex; gap: 10px; align-items: center; }
+    .habit-item-edit input { flex: 1; background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.15); border-radius: 8px; padding: 10px 12px; color: white; font-size: 14px; }
+    .habit-item-edit input::placeholder { color: rgba(255,255,255,0.3); }
+    .habit-item-edit .remove-habit { background: rgba(239, 68, 68, 0.2); border: none; color: #f87171; width: 36px; height: 36px; border-radius: 8px; cursor: pointer; font-size: 16px; }
+    
+    .add-habit-btn { width: 100%; padding: 14px; border-radius: 12px; border: 2px dashed rgba(34, 197, 94, 0.3); background: rgba(34, 197, 94, 0.1); color: #4ade80; font-size: 14px; font-weight: 500; cursor: pointer; margin: 16px 0; }
   </style>
 </head>
 <body>
@@ -171,10 +204,10 @@
 
   <nav class="tabs">
     <button class="tab active" data-tab="today">✓ Today</button>
+    <button class="tab" data-tab="habits">🔄 Habits</button>
     <button class="tab" data-tab="notes">📝 Notes</button>
     <button class="tab" data-tab="calendar">📅 Agenda</button>
     <button class="tab" data-tab="projects">🚀 Projets</button>
-    <button class="tab" data-tab="people">👥 CRM</button>
   </nav>
 
   <div class="filters" id="filters">
@@ -187,6 +220,21 @@
 
   <main class="content">
     <section id="today" class="tab-content"><div id="tasks-list"></div></section>
+    
+    <section id="habits" class="tab-content hidden">
+      <div class="habits-header">
+        <div class="habits-progress">
+          <div class="habits-progress-text">
+            <span id="habits-done">0</span>/<span id="habits-total">0</span>
+          </div>
+          <div class="habits-progress-bar"><div class="habits-progress-fill" id="habits-fill"></div></div>
+        </div>
+      </div>
+      <div class="protocol-selector" id="protocol-selector"></div>
+      <div id="habits-list"></div>
+      <button class="add-btn" onclick="openProtocolModal()">+ Nouveau protocole</button>
+    </section>
+    
     <section id="notes" class="tab-content hidden">
       <button class="add-btn" onclick="openCapture('note')">+ Nouvelle note</button>
       <div class="section-title">📝 Notes récentes</div>
@@ -201,10 +249,6 @@
       <div class="section-title">🚀 Projets actifs</div>
       <div id="projects-list"></div>
     </section>
-    <section id="people" class="tab-content hidden">
-      <div class="pipeline" id="pipeline"></div>
-      <button class="add-btn" onclick="openCapture('contact')">+ Nouveau contact</button>
-    </section>
   </main>
 
   <button class="fab" onclick="openCapture('task')">+</button>
@@ -217,7 +261,6 @@
         <button class="type-btn" data-type="note">📝 Note</button>
         <button class="type-btn" data-type="event">📅 Event</button>
         <button class="type-btn" data-type="project">🚀 Projet</button>
-        <button class="type-btn" data-type="contact">👤 Contact</button>
       </div>
       <input type="text" class="input" id="captureInput" placeholder="Nouvelle tâche...">
       
@@ -276,6 +319,22 @@
 
   <div class="toast" id="toast"></div>
 
+  <!-- Protocol Modal -->
+  <div class="protocol-modal" id="protocolModal">
+    <div class="protocol-modal-content">
+      <div class="protocol-modal-header">
+        <h3 id="protocol-modal-title">🔄 Nouveau protocole</h3>
+        <button class="close-protocol" onclick="closeProtocolModal()">✕</button>
+      </div>
+      <input type="text" class="input" id="protocolName" placeholder="Nom du protocole (ex: Morning Routine)">
+      <div class="section-title">Habitudes</div>
+      <div id="protocol-habits-list"></div>
+      <button class="add-habit-btn" onclick="addHabitToProtocol()">+ Ajouter une habitude</button>
+      <button class="submit-btn" onclick="saveProtocol()" style="margin-top:20px">Enregistrer</button>
+      <button class="submit-btn danger hidden" id="deleteProtocolBtn" onclick="deleteProtocol()" style="margin-top:8px">🗑️ Supprimer le protocole</button>
+    </div>
+  </div>
+
   <script>
     // CONFETTI
     const confettiCanvas = document.getElementById('confetti-canvas');
@@ -326,15 +385,32 @@
     const N8N_DELETE_TASK_URL = `${N8N_BASE}lifeos-delete-task`;
     const N8N_NOTE_URL = 'https://hologramblues.app.n8n.cloud/webhook/lifeos-note';
     const N8N_EVENT_URL = 'https://hologramblues.app.n8n.cloud/webhook/lifeos-event';
+    
+    // HABITS API
+    const N8N_PROTOCOLS_URL = `${N8N_BASE}lifeos-protocols-habits`;
+    const N8N_HABITS_URL = `${N8N_BASE}lifeos-habits`;
+    const N8N_HABIT_LOGS_URL = `${N8N_BASE}lifeos-habit-logs`;
+    const N8N_TOGGLE_HABIT_URL = `${N8N_BASE}lifeos-toggle-habit`;
+    const N8N_CREATE_PROTOCOL_URL = `${N8N_BASE}lifeos-create-protocol`;
+    const N8N_CREATE_HABIT_URL = `${N8N_BASE}lifeos-create-habit`;
 
     // STATE
     let currentTab = 'today', currentFilter = 'all', projectFilter = '', captureType = 'task', noteType = 'Idea', taskPriority = 'Medium';
     let isLoading = false, projectsMap = {}, completedToday = 0, editingTask = null, taskToDelete = null;
     let tasks = [], notes = [], events = [], projects = [], people = [];
     
+    // HABITS STATE (Notion-synced + localStorage fallback)
+    let protocols = [];
+    let habits = [];
+    let habitLogs = [];
+    let todayStr = new Date().toISOString().split('T')[0];
+    let currentProtocol = localStorage.getItem('lifeos-current-protocol') || null;
+    let editingProtocol = null;
+    let tempProtocolHabits = [];
+    let habitsLoaded = false;
+    
     const priorityColors = { High: '#ef4444', Medium: '#f59e0b', Low: '#6b7280' };
     const noteTypeColors = { Idea: '#f59e0b', Reference: '#6b7280', Meeting: '#eab308', Journal: '#8b5cf6', Plan: '#3b82f6' };
-    const pipelineColors = { Prospect: '#6b7280', Contacted: '#3b82f6', Negotiating: '#f59e0b', Closed: '#22c55e' };
 
     // TOAST
     function showToast(msg, type = 'success') {
@@ -587,16 +663,6 @@
       showToast(`Filtre: ${projectsMap[id]}`);
     }
 
-    function renderPipeline() {
-      const stages = ['Prospect', 'Contacted', 'Negotiating', 'Closed'];
-      document.getElementById('pipeline').innerHTML = people.length ? stages.map(s => `
-        <div class="pipeline-col">
-          <div class="pipeline-header"><span class="pipeline-dot" style="background: ${pipelineColors[s]}"></span>${s} (${people.filter(p => p.status === s).length})</div>
-          ${people.filter(p => p.status === s).map(p => `<div class="pipeline-card"><h4>${p.name}</h4></div>`).join('')}
-        </div>
-      `).join('') : '<div class="empty" style="width:100%">👥 Aucun contact</div>';
-    }
-
     function formatDate(d) { return d ? new Date(d).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' }) : ''; }
 
     // MODAL
@@ -626,7 +692,6 @@
       else if (captureType === 'note') { input.placeholder = 'Titre de la note...'; document.getElementById('noteOptions').classList.remove('hidden'); }
       else if (captureType === 'event') { input.placeholder = "Titre de l'événement..."; document.getElementById('eventOptions').classList.remove('hidden'); document.getElementById('eventDate').value = new Date().toISOString().split('T')[0]; }
       else if (captureType === 'project') input.placeholder = 'Nom du projet...';
-      else if (captureType === 'contact') input.placeholder = 'Nom du contact...';
     }
 
     document.querySelectorAll('.type-btn[data-type]').forEach(b => b.addEventListener('click', () => { captureType = b.dataset.type; updateTypeButtons(); updateCaptureUI(); }));
@@ -670,9 +735,6 @@
         } else if (captureType === 'project') {
           projects.push({ id: 'p' + Date.now(), name: text, status: 'Planned', total: 0, done: 0 });
           renderProjects(); updateProjectDropdowns(); launchConfetti(); showToast('Projet créé !');
-        } else if (captureType === 'contact') {
-          people.push({ id: 'c' + Date.now(), name: text, status: 'Prospect' });
-          renderPipeline(); launchConfetti(); showToast('Contact ajouté !');
         }
         document.getElementById('modal').classList.remove('open'); editingTask = null;
       } finally { btn.disabled = false; btn.textContent = 'Ajouter'; }
@@ -680,10 +742,317 @@
 
     document.getElementById('captureInput').addEventListener('keydown', e => { if (e.key === 'Enter') capture(); });
 
+    // ==========================================
+    // HABITS & PROTOCOLS (Notion Sync)
+    // ==========================================
+    async function fetchProtocols() {
+      try {
+        const res = await fetch(N8N_PROTOCOLS_URL);
+        const data = await res.json();
+        if (data.protocols) {
+          protocols = data.protocols.sort((a, b) => (a.order || 0) - (b.order || 0));
+          renderProtocolSelector();
+        }
+      } catch (e) {
+        console.error('Fetch protocols error:', e);
+        // Fallback to localStorage
+        protocols = JSON.parse(localStorage.getItem('lifeos-protocols') || '[]');
+        renderProtocolSelector();
+      }
+    }
+    
+    async function fetchHabits() {
+      try {
+        const res = await fetch(N8N_HABITS_URL);
+        const data = await res.json();
+        if (data.habits) {
+          habits = data.habits.filter(h => h.active !== false).sort((a, b) => (a.order || 0) - (b.order || 0));
+        }
+      } catch (e) {
+        console.error('Fetch habits error:', e);
+        habits = [];
+      }
+    }
+    
+    async function fetchHabitLogs() {
+      try {
+        const res = await fetch(N8N_HABIT_LOGS_URL);
+        const data = await res.json();
+        if (data.logs) {
+          habitLogs = data.logs;
+        }
+      } catch (e) {
+        console.error('Fetch habit logs error:', e);
+        habitLogs = [];
+      }
+    }
+    
+    async function loadHabitsData() {
+      setLoading(true);
+      await Promise.all([fetchProtocols(), fetchHabits(), fetchHabitLogs()]);
+      habitsLoaded = true;
+      renderHabits();
+      setLoading(false);
+    }
+    
+    function isHabitDoneToday(habitId) {
+      return habitLogs.some(l => l.habitId === habitId && l.date === todayStr && l.completed);
+    }
+    
+    function getHabitStreak(habitId) {
+      let streak = 0;
+      const today = new Date();
+      for (let i = 0; i < 365; i++) {
+        const d = new Date(today);
+        d.setDate(d.getDate() - i);
+        const dateStr = d.toISOString().split('T')[0];
+        const hasLog = habitLogs.some(l => l.habitId === habitId && l.date === dateStr && l.completed);
+        if (hasLog) streak++;
+        else if (i > 0) break;
+      }
+      return streak;
+    }
+    
+    function renderProtocolSelector() {
+      const container = document.getElementById('protocol-selector');
+      if (protocols.length === 0) {
+        container.innerHTML = '<div style="color:rgba(255,255,255,0.4);font-size:13px;padding:8px 0;">Crée ton premier protocole →</div>';
+        return;
+      }
+      
+      if (!currentProtocol && protocols.length > 0) {
+        currentProtocol = protocols[0].id;
+        localStorage.setItem('lifeos-current-protocol', currentProtocol);
+      }
+      
+      container.innerHTML = protocols.map(p => `
+        <button class="protocol-chip ${p.id === currentProtocol ? 'active' : ''}" onclick="selectProtocol('${p.id}')">
+          ${p.icon || '🔄'} ${p.name}
+          <span class="edit-protocol" onclick="event.stopPropagation(); editProtocol('${p.id}')">✏️</span>
+        </button>
+      `).join('');
+    }
+    
+    function selectProtocol(id) {
+      currentProtocol = id;
+      localStorage.setItem('lifeos-current-protocol', id);
+      renderProtocolSelector();
+      renderHabits();
+    }
+    
+    function renderHabits() {
+      if (!currentProtocol) {
+        document.getElementById('habits-list').innerHTML = '<div class="empty">🔄 Sélectionne un protocole</div>';
+        document.getElementById('habits-done').textContent = '0';
+        document.getElementById('habits-total').textContent = '0';
+        document.getElementById('habits-fill').style.width = '0%';
+        return;
+      }
+      
+      const protocolHabits = habits.filter(h => h.protocolId === currentProtocol);
+      const done = protocolHabits.filter(h => isHabitDoneToday(h.id)).length;
+      const total = protocolHabits.length;
+      const pct = total > 0 ? Math.round((done / total) * 100) : 0;
+      
+      document.getElementById('habits-done').textContent = done;
+      document.getElementById('habits-total').textContent = total;
+      document.getElementById('habits-fill').style.width = pct + '%';
+      
+      if (protocolHabits.length === 0) {
+        document.getElementById('habits-list').innerHTML = '<div class="empty">Ajoute des habitudes à ce protocole</div>';
+        return;
+      }
+      
+      document.getElementById('habits-list').innerHTML = protocolHabits.map(h => {
+        const isDone = isHabitDoneToday(h.id);
+        const streak = getHabitStreak(h.id);
+        return `
+          <div class="habit-card ${isDone ? 'done' : ''}" onclick="toggleHabit('${h.id}')">
+            <div class="habit-check">${isDone ? '✓' : ''}</div>
+            <div class="habit-content">
+              <div class="habit-name">${h.name}</div>
+              <div class="habit-meta">
+                ${streak > 0 ? `<span class="habit-streak">🔥 ${streak}j</span>` : ''}
+                ${h.time ? `<span class="habit-time">⏰ ${h.time}</span>` : ''}
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+    
+    async function toggleHabit(habitId) {
+      const isDone = isHabitDoneToday(habitId);
+      const newState = !isDone;
+      
+      // Optimistic update
+      if (newState) {
+        habitLogs.push({ id: 'temp-' + Date.now(), habitId, date: todayStr, completed: true });
+      } else {
+        habitLogs = habitLogs.filter(l => !(l.habitId === habitId && l.date === todayStr));
+      }
+      renderHabits();
+      
+      if (newState) {
+        launchConfetti();
+        if (navigator.vibrate) navigator.vibrate([10, 30, 10]);
+      }
+      
+      // Sync with Notion
+      try {
+        await fetch(N8N_TOGGLE_HABIT_URL, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ habitId, date: todayStr, completed: newState })
+        });
+      } catch (e) {
+        console.error('Toggle habit error:', e);
+        showToast('Erreur sync', 'error');
+      }
+    }
+    
+    function openProtocolModal(existingId = null) {
+      editingProtocol = existingId ? protocols.find(p => p.id === existingId) : null;
+      
+      document.getElementById('protocol-modal-title').textContent = editingProtocol ? '✏️ Modifier le protocole' : '🔄 Nouveau protocole';
+      document.getElementById('protocolName').value = editingProtocol?.name || '';
+      document.getElementById('deleteProtocolBtn').classList.toggle('hidden', !editingProtocol);
+      
+      // Get habits for this protocol from the habits array
+      tempProtocolHabits = editingProtocol 
+        ? habits.filter(h => h.protocolId === editingProtocol.id).map(h => ({ name: h.name, time: h.time || '' }))
+        : [];
+      renderProtocolHabitsEditor();
+      
+      document.getElementById('protocolModal').classList.add('open');
+    }
+    
+    function closeProtocolModal() {
+      document.getElementById('protocolModal').classList.remove('open');
+      editingProtocol = null;
+      tempProtocolHabits = [];
+    }
+    
+    function renderProtocolHabitsEditor() {
+      document.getElementById('protocol-habits-list').innerHTML = tempProtocolHabits.map((h, i) => `
+        <div class="habit-item-edit">
+          <input type="text" value="${h.name}" onchange="updateTempHabit(${i}, 'name', this.value)" placeholder="Nom de l'habitude">
+          <input type="time" value="${h.time || ''}" onchange="updateTempHabit(${i}, 'time', this.value)" style="width:100px">
+          <button class="remove-habit" onclick="removeTempHabit(${i})">✕</button>
+        </div>
+      `).join('') || '<div style="color:rgba(255,255,255,0.3);font-size:13px;padding:12px;text-align:center;">Aucune habitude</div>';
+    }
+    
+    function addHabitToProtocol() {
+      tempProtocolHabits.push({ name: '', time: '' });
+      renderProtocolHabitsEditor();
+      // Focus the new input
+      setTimeout(() => {
+        const inputs = document.querySelectorAll('#protocol-habits-list input[type="text"]');
+        if (inputs.length > 0) inputs[inputs.length - 1].focus();
+      }, 50);
+    }
+    
+    function updateTempHabit(index, field, value) {
+      tempProtocolHabits[index][field] = value;
+    }
+    
+    function removeTempHabit(index) {
+      tempProtocolHabits.splice(index, 1);
+      renderProtocolHabitsEditor();
+    }
+    
+    async function saveProtocol() {
+      const name = document.getElementById('protocolName').value.trim();
+      if (!name) { showToast('Nom requis', 'error'); return; }
+      
+      const validHabits = tempProtocolHabits.filter(h => h.name.trim());
+      
+      if (editingProtocol) {
+        // Update existing - for now just update local, full Notion update later
+        const p = protocols.find(p => p.id === editingProtocol.id);
+        if (p) p.name = name;
+        showToast('Protocole modifié');
+      } else {
+        // Create new protocol in Notion
+        try {
+          const res = await fetch(N8N_CREATE_PROTOCOL_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, icon: '🔄', order: protocols.length })
+          });
+          const data = await res.json();
+          
+          if (data.success && data.protocolId) {
+            // Create habits for this protocol
+            for (let i = 0; i < validHabits.length; i++) {
+              const h = validHabits[i];
+              await fetch(N8N_CREATE_HABIT_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ 
+                  name: h.name, 
+                  protocolId: data.protocolId, 
+                  time: h.time || '',
+                  order: i 
+                })
+              });
+            }
+            
+            // Add to local state
+            protocols.push({ id: data.protocolId, name, icon: '🔄', order: protocols.length });
+            currentProtocol = data.protocolId;
+            localStorage.setItem('lifeos-current-protocol', currentProtocol);
+            
+            // Reload habits
+            await fetchHabits();
+            launchConfetti();
+            showToast('Protocole créé !');
+          }
+        } catch (e) {
+          console.error('Create protocol error:', e);
+          showToast('Erreur création', 'error');
+          return;
+        }
+      }
+      
+      renderProtocolSelector();
+      renderHabits();
+      closeProtocolModal();
+    }
+    
+    function editProtocol(id) {
+      openProtocolModal(id);
+    }
+    
+    function deleteProtocol() {
+      if (!editingProtocol) return;
+      if (!confirm(`Supprimer "${editingProtocol.name}" ?`)) return;
+      
+      // For now, just remove locally (Notion archive later)
+      protocols = protocols.filter(p => p.id !== editingProtocol.id);
+      habits = habits.filter(h => h.protocolId !== editingProtocol.id);
+      
+      if (currentProtocol === editingProtocol.id) {
+        currentProtocol = protocols[0]?.id || null;
+        localStorage.setItem('lifeos-current-protocol', currentProtocol || '');
+      }
+      
+      renderProtocolSelector();
+      renderHabits();
+      closeProtocolModal();
+      showToast('Protocole supprimé');
+    }
+
     // INIT
     updateGreeting(); updatePriorityButtons();
-    renderTasks(); renderNotes(); renderEvents(); renderProjects(); renderPipeline();
-    (async () => { await fetchProjects(); await fetchTasks(); })();
+    renderTasks(); renderNotes(); renderEvents(); renderProjects();
+    renderProtocolSelector(); renderHabits();
+    (async () => { 
+      await fetchProjects(); 
+      await fetchTasks(); 
+      await loadHabitsData();
+    })();
   </script>
 </body>
 </html>

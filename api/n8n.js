@@ -25,7 +25,7 @@ export default async function handler(req, res) {
     'lifeos-create-task': 'https://hologramblues.app.n8n.cloud/webhook/lifeos-create-task',
     'lifeos-update-task': 'https://hologramblues.app.n8n.cloud/webhook/lifeos-update-task',
     'lifeos-delete-task': 'https://hologramblues.app.n8n.cloud/webhook/lifeos-delete-task',
-    'lifeos-protocols-habits': 'https://hologramblues.app.n8n.cloud/webhook/lifeos-protocols-habits',
+    'lifeos-protocols': 'https://hologramblues.app.n8n.cloud/webhook/lifeos-protocols',
     'lifeos-habits': 'https://hologramblues.app.n8n.cloud/webhook/lifeos-habits',
     'lifeos-habit-logs': 'https://hologramblues.app.n8n.cloud/webhook/lifeos-habit-logs',
     'lifeos-toggle-habit': 'https://hologramblues.app.n8n.cloud/webhook/lifeos-toggle-habit',

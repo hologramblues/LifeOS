@@ -1,5 +1,5 @@
 // Vercel Serverless Function - n8n Proxy
-// Routes: lifeos-tasks, lifeos-projects, lifeos-toggle, lifeos-create-task, lifeos-update-task
+// Routes: Tasks, Habits, Protocols, Calendar Events
 
 export default async function handler(req, res) {
   // CORS headers
@@ -19,21 +19,26 @@ export default async function handler(req, res) {
 
   // Map endpoints to n8n webhook URLs
   const endpoints = {
+    // Tasks
     'lifeos-tasks': 'https://hologramblues.app.n8n.cloud/webhook/lifeos-tasks',
     'lifeos-projects': 'https://hologramblues.app.n8n.cloud/webhook/lifeos-projects',
     'lifeos-toggle': 'https://hologramblues.app.n8n.cloud/webhook/lifeos-toggle',
     'lifeos-create-task': 'https://hologramblues.app.n8n.cloud/webhook/lifeos-create-task',
     'lifeos-update-task': 'https://hologramblues.app.n8n.cloud/webhook/lifeos-update-task',
     'lifeos-delete-task': 'https://hologramblues.app.n8n.cloud/webhook/lifeos-delete-task',
+    // Habits
     'lifeos-protocols': 'https://hologramblues.app.n8n.cloud/webhook/lifeos-protocols',
     'lifeos-habits': 'https://hologramblues.app.n8n.cloud/webhook/lifeos-habits',
     'lifeos-habit-logs': 'https://hologramblues.app.n8n.cloud/webhook/lifeos-habit-logs',
     'lifeos-toggle-habit': 'https://hologramblues.app.n8n.cloud/webhook/lifeos-toggle-habit',
     'lifeos-create-protocol': 'https://hologramblues.app.n8n.cloud/webhook/lifeos-create-protocol',
-    'lifeos-create-habit': 'https://hologramblues.app.n8n.cloud/webhook/lifeos-create-habit'
+    'lifeos-create-habit': 'https://hologramblues.app.n8n.cloud/webhook/lifeos-create-habit',
+    // Calendar
+    'lifeos-events': 'https://hologramblues.app.n8n.cloud/webhook/lifeos-events',
+    'lifeos-event': 'https://hologramblues.app.n8n.cloud/webhook/lifeos-event'
   };
 
-  const targetUrl = endpoints[endpoint];
+  let targetUrl = endpoints[endpoint];
   
   if (!targetUrl) {
     return res.status(400).json({ error: `Unknown endpoint: ${endpoint}` });
@@ -41,14 +46,23 @@ export default async function handler(req, res) {
 
   try {
     const fetchOptions = {
-      method: req.method,
       headers: {
         'Content-Type': 'application/json',
       },
     };
 
-    if (req.method === 'POST' && req.body) {
-      fetchOptions.body = JSON.stringify(req.body);
+    // Handle GET requests with query params (for lifeos-events)
+    if (req.method === 'GET') {
+      fetchOptions.method = 'GET';
+      // Pass date query param if provided
+      if (req.query.date) {
+        targetUrl += `?date=${req.query.date}`;
+      }
+    } else {
+      fetchOptions.method = req.method;
+      if (req.body) {
+        fetchOptions.body = JSON.stringify(req.body);
+      }
     }
 
     const response = await fetch(targetUrl, fetchOptions);
